@@ -3,22 +3,24 @@ from pymavlink import mavutil
 from app.drone.moves.DroneMoves import DroneMoveUPFactory
 from timeit import default_timer as timer
 from app.drone.tools.GPS import GPS
-from app.drone.enums.Masks import POSITION, VELOCITY
+from app.drone.enums.Masks import POSITION, ONLY_POSITION
 
 class DroneConfig:
     def __init__(self) -> None:
         self.GUIDED_MODE = 4
+        self.x_meters_cover = 10
+        self.y_meters_cover = 10
         
 # senha:101263
 class Drone:
     def __init__(self) -> None:
-        # self.IP = '127.0.0.1'
-        # self.PORT = '14550'
-        # self.PROTOCOL = 'udpin'
+        self.IP = '127.0.0.1'
+        self.PORT = '14550'
+        self.PROTOCOL = 'udpin'
         
-        self.IP = '192.168.0.103'
-        self.PORT = '5760'
-        self.PROTOCOL = 'tcp'
+        # self.IP = '192.168.0.103'
+        # self.PORT = '5760'
+        # self.PROTOCOL = 'tcp'
         
         self.URL = f'{self.PROTOCOL}:{self.IP}:{self.PORT}'
         self.baud = '57600'
@@ -241,16 +243,18 @@ class Drone:
         self.set_velocity_body(north, east, down)
         
    
-    def adjust_position(self, x, y):
-        self.conn.mav.send(
-            mavutil.mavlink.MAVLink_set_position_target_local_ned_message(
-                2,  # time_boot_ms
-                self.conn.target_system,
-                self.conn.target_component,
-                mavutil.mavlink.MAV_FRAME_LOCAL_NED,
-                VELOCITY,  # type_mask (only positions enabled)
-                0, 0, 0,  # x, y, z velocity
-                x, y, 0,  # x, y, z positions
-                0, 0, 0,  # x, y, z acceleration (not used)
-                0, 0))  # yaw, yaw_rate
-        time.sleep(10)
+    def adjust_position(self, x, y, z=0):
+        type_mask = 0b0000111111111000  
+        
+        self.conn.mav.set_position_target_local_ned_send(
+            0,  # Tempo de envio em milissegundos, pode ser 0
+            self.conn.target_system,  # ID do sistema do drone
+            self.conn.target_component,  # ID do componente do drone
+            mavutil.mavlink.MAV_FRAME_LOCAL_NED,  # Frame de referência (local NED)
+            type_mask,  # Tipo de máscara
+            0, 0, 0,  # Velocidade x, y, z (não utilizada aqui)
+            x, y, z,  # Posições x, y, z
+            0, 0, 0,  # Aceleração x, y, z (não utilizada aqui)
+            0, 0  # Yaw, yaw_rate (não utilizado aqui)
+        )
+# # Define the distances to move
