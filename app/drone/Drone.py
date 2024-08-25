@@ -8,19 +8,19 @@ from app.drone.enums.Masks import POSITION, ONLY_POSITION
 class DroneConfig:
     def __init__(self) -> None:
         self.GUIDED_MODE = 4
-        self.x_meters_cover = 10
-        self.y_meters_cover = 10
+        self.x_meters_cover = 6
+        self.y_meters_cover = 3
         
 # senha:101263
 class Drone:
     def __init__(self) -> None:
-        self.IP = '127.0.0.1'
-        self.PORT = '14550'
-        self.PROTOCOL = 'udpin'
+        # self.IP = '127.0.0.1'
+        # self.PORT = '14550'
+        # self.PROTOCOL = 'udpin'
         
-        # self.IP = '192.168.0.103'
-        # self.PORT = '5760'
-        # self.PROTOCOL = 'tcp'
+        self.IP = '192.168.0.103'
+        self.PORT = '5760'
+        self.PROTOCOL = 'tcp'
         
         self.URL = f'{self.PROTOCOL}:{self.IP}:{self.PORT}'
         self.baud = '57600'
@@ -242,19 +242,21 @@ class Drone:
         print(f"Moving NED for {north}m north, {east}m east, {down}m down")
         self.set_velocity_body(north, east, down)
         
-   
-    def adjust_position(self, x, y, z=0):
-        type_mask = 0b0000111111111000  
-        
+
+    def adjust_position(self, offset_x, offset_y, sensitivity=0.01):
+        move_x = offset_x
+        move_y = offset_y 
+        print(f"Ajustando posição: move_x: {move_x}, move_y: {move_y}")
+
+        # Envie o comando para o drone
         self.conn.mav.set_position_target_local_ned_send(
-            0,  # Tempo de envio em milissegundos, pode ser 0
-            self.conn.target_system,  # ID do sistema do drone
-            self.conn.target_component,  # ID do componente do drone
-            mavutil.mavlink.MAV_FRAME_LOCAL_NED,  # Frame de referência (local NED)
-            type_mask,  # Tipo de máscara
-            0, 0, 0,  # Velocidade x, y, z (não utilizada aqui)
-            x, y, z,  # Posições x, y, z
-            0, 0, 0,  # Aceleração x, y, z (não utilizada aqui)
-            0, 0  # Yaw, yaw_rate (não utilizado aqui)
-        )
+            time_boot_ms=0,
+            target_system=self.conn.target_system,
+            target_component=self.conn.target_component,
+            coordinate_frame=mavutil.mavlink.MAV_FRAME_LOCAL_NED,
+            type_mask=0b0000111111000111,  # Considera apenas velocidades
+            x=0, y=0, z=0,
+            vx=move_x, vy=move_y, vz=0,
+            afx=0, afy=0, afz=0,
+            yaw=0, yaw_rate=0)
 # # Define the distances to move

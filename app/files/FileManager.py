@@ -3,9 +3,9 @@ import os
 import cv2
 
 class FileManager:
-    def __init__(self) -> None:
-        self.save_path = 'captured_images_tests_4'
-        self.meta_path = 'metadata_images_tests_4'
+    def __init__(self, save_path, meta_path) -> None:
+        self.save_path = save_path
+        self.meta_path =  meta_path
         self.type_img_dir = ''
         self.type_meta_dir = ''
         self.timestamp = None
@@ -27,7 +27,8 @@ class FileManager:
         print(f"Imagem {index+1} capturada e salva em: {image_filename}")
         
     def create_meta_data(self, lat, long, alt, real_alt, index):
-        metadata_filename = f"{self.type_meta_dir}/alt_{alt}_Metadata_{index+1}_{self.timestamp}.txt"
+        self.timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        metadata_filename = f"{self.meta_path}/{index}.txt"
         with open(metadata_filename, 'w') as metafile:
             metafile.write(f"Timestamp: {self.timestamp}\n")
             metafile.write(f"Latitude: {lat}\n")

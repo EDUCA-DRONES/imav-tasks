@@ -14,12 +14,13 @@ class TaskTwo:
 
     def __init__(self) -> None:
         self.drone = Drone()
-        self.file_manager = FileManager()
+        self.file_manager = FileManager('imgs/map/img', 'imgs/map/meta')
+        self.file_manager.create_base_dirs()
         self.camera = Camera()
         
         self.camera_type = 'rtsp'
-        self.territory_x = 50
-        self.territory_y = 50
+        self.territory_x = 20
+        self.territory_y = 20
              
     def run(self):
         try:
@@ -34,10 +35,18 @@ class TaskTwo:
             self.drone.arm_drone()
             self.drone.ascend(12)
                 
+            is_front = True
+            count = 1
             for x in range(1, x_loop + 1):
-                self.inspect_animals(self.drone.config.x_meters_cover, 0)
+                if x != 1:
+                    self.inspect_animals(self.drone.config.x_meters_cover, 0, count)
                 for y in range(1, y_loop + 1):
-                    self.inspect_animals(0, self.drone.config.y_meters_cover)
+                    if is_front:
+                        self.inspect_animals(0, self.drone.config.y_meters_cover, count)
+                    else:
+                        self.inspect_animals(0, -self.drone.config.y_meters_cover, count)
+                    count = count + 1
+                is_front = not is_front
         
         except KeyboardInterrupt as e:
             print(e)
@@ -46,24 +55,28 @@ class TaskTwo:
             print(e)
             
         finally:
-            self.drone.land()
-            self.drone.disarm() 
+            pass
+            # self.drone.land()
+            # self.drone.disarm() 
   
-    def inspect_animals(self, x, y):
+    def inspect_animals(self, x, y, count):
         x = x /  2 if x != 0 else 0
         y = y /  2 if y != 0 else 0
         
-        self.drone.adjust_position(x, y)
+        self.drone.adjust_position(-x, -y)
         
         self.camera.initialize_video_capture(self.camera_type)
         
-        time.sleep(3)
+        time.sleep(0.5)
         print(self.drone.get_gps_position())
         self.camera.read_capture()
-        self.camera.save_image(f'imgs/map/img-{x}-{y}.jpg')
-        time.sleep(3)
+    
+        self.camera.save_image(f'imgs/map/img-{count}.jpg')
+        lat, long, alt = self.drone.get_gps_position()
+        self.file_manager.create_meta_data(lat, long, alt, self.drone.current_altitude(),count)
+        time.sleep(0.5)
         
-        self.drone.adjust_position(x, y)
+        self.drone.adjust_position(-x, -y)
       
       
 
