@@ -4,6 +4,7 @@ from app.drone.moves.DroneMoves import DroneMoveUPFactory
 from timeit import default_timer as timer
 from app.drone.tools.GPS import GPS
 from app.drone.enums.Masks import POSITION, ONLY_POSITION
+import math
 
 class DroneConfig:
     def __init__(self) -> None:
@@ -14,13 +15,13 @@ class DroneConfig:
 # senha:101263
 class Drone:
     def __init__(self) -> None:
-        # self.IP = '127.0.0.1'
-        # self.PORT = '14550'
-        # self.PROTOCOL = 'udpin'
+        self.IP = '127.0.0.1'
+        self.PORT = '14551'
+        self.PROTOCOL = 'udpin'
         
-        self.IP = '192.168.0.103'
-        self.PORT = '5760'
-        self.PROTOCOL = 'tcp'
+        #self.IP = '192.168.0.104'
+        #self.PORT = '5760'
+        #self.PROTOCOL = 'tcp'
         
         self.URL = f'{self.PROTOCOL}:{self.IP}:{self.PORT}'
         self.baud = '57600'
@@ -30,6 +31,9 @@ class Drone:
         self.config = DroneConfig()
         self.velocity = 30
         self.gps = GPS()
+
+        self.home_lat = None
+        self.home_long = None
         
     def connected(self):
         return self.conn.wait_heartbeat(timeout=5)
@@ -259,4 +263,61 @@ class Drone:
             vx=move_x, vy=move_y, vz=0,
             afx=0, afy=0, afz=0,
             yaw=0, yaw_rate=0)
-# # Define the distances to move
+    
+    def has_reached_position(self, target_lat, target_long):
+        """Verifica se o drone chegou à coordenada alvo (com uma margem de erro)."""
+        current_lat, current_long, _ = self.get_gps_position()
+        distance = self.calculate_distance(current_lat, current_long, target_lat, target_long)
+        return distance < 5  # 5 metros
+
+    def move_to_position(self, target_lat, target_long, max_attempts=5, movement_check_interval=5):
+        """Move o drone para a posição especificada com verificação de progresso."""
+        for attempt in range(max_attempts):
+            self.go_to_coord(target_lat, target_long)
+            initial_lat, initial_long, _ = self.get_gps_position()
+            
+            # Verifica se o drone está se movendo em direção à coordenada
+            time.sleep(movement_check_interval)
+            current_lat, current_long, _ = self.get_gps_position()
+            
+            if self.is_moving_towards_target(initial_lat, initial_long, current_lat, current_long, target_lat, target_long):
+                # Espera até o drone atingir a coordenada
+                while not self.has_reached_position(target_lat, target_long):
+                    time.sleep(1)
+                return True
+            else:
+                print(f"Tentativa {attempt + 1}/{max_attempts} falhou. Reenviando comando.")
+        
+        return False
+    
+    def is_moving_towards_target(self, initial_lat, initial_long, current_lat, current_long, target_lat, target_long):
+        """Verifica se o drone está se movendo em direção à coordenada de destino."""
+        initial_distance = self.calculate_distance(initial_lat, initial_long, target_lat, target_long)
+        current_distance = self.calculate_distance(current_lat, current_long, target_lat, target_long)
+        
+        # Se a distância atual for menor que a inicial, o drone está se movendo na direção correta
+        return current_distance < initial_distance
+    
+    def calculate_distance(self, lat1, long1, lat2, long2):
+        """Calcula a distância entre duas coordenadas usando a fórmula de Haversine."""
+        # Converter graus para radianos
+        lat1, long1, lat2, long2 = map(math.radians, [lat1, long1, lat2, long2])
+        
+        # Fórmula de Haversine
+        dlat = lat2 - lat1
+        dlong = long2 - long1
+        a = math.sin(dlat / 2) ** 2 + math.cos(lat1) * math.cos(lat2) * math.sin(dlong / 2) ** 2
+        c = 2 * math.atan2(math.sqrt(a), math.sqrt(1 - a))
+        r = 6371  # Raio da Terra em quilômetros
+        return r * c * 1000  # Converter para metros
+
+
+    def set_home(self, lat, long):
+        self.home_lat = lat
+        self.home_long = long
+    
+    def return_to_home(self):
+        print("O drone está retornando para HOME")
+        self.move_to_position(self.home_lat, self.home_long)
+        print("Iniciando pouso")
+        self.land()

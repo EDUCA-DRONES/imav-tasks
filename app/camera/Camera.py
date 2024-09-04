@@ -105,6 +105,8 @@ class Camera:
                 fileManager.create_meta_data(lat, long, alt, drone.current_altitude(), i)
             
             self.clean_buffer()
+
+        self.release_video_capture() # Libera a câmera após a captura
                     
     def clean_buffer(self):
         for _ in range(40):  # Limpa os últimos 40 frames para garantir frescor
@@ -112,3 +114,9 @@ class Camera:
 
     def save_image(self, path):
         cv2.imwrite(path, self.frame)
+    
+    def release_video_capture(self): # Libera a câmera
+        if self.cap:
+            self.cap.release()
+            self.cap = None
+            print("Captura de vídeo liberada.")

@@ -2,6 +2,7 @@ import matplotlib.pyplot as plt
 import os
 import csv
 import os
+from datetime import datetime
 
 os.environ.pop("QT_QPA_PLATFORM_PLUGIN_PATH")
 
@@ -67,6 +68,23 @@ class DetectionsByAltReport(MetaSingleton):
                 file_path = os.path.join(folder_path, f'alt_{alt}.png')
                 plt.savefig(file_path)
                 plt.close()
+class FlightLogger:
+    def __init__(self, log_file='flight_log.csv'):
+        self.log_file = log_file
+        self.initialize_log_file()
+
+    def initialize_log_file(self):
+        # Cria o arquivo CSV e escreve o cabeçalho
+        with open(self.log_file, mode='w', newline='') as file:
+            writer = csv.writer(file)
+            writer.writerow(['Zebra ID', 'Image ID Number', 'Time UTC', 'Latitude', 'Longitude', 'Altitude', 'Image Name'])
+
+    def log_position(self, zebra_id, image_id, lat, long, alt, image_name):
+        # Registra a posição atual do drone no arquivo CSV
+        with open(self.log_file, mode='a', newline='') as file:
+            writer = csv.writer(file)
+            timestamp = datetime.utcnow().isoformat()  # Hora UTC no formato AAAA-MM-DDTHH:MM:SS.sss
+            writer.writerow([zebra_id, image_id, timestamp, lat, long, alt, image_name])
 
 # Example usage:
 # singleton = ReportCapturedImagesSingleton()
