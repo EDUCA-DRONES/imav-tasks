@@ -65,7 +65,7 @@ class DroneTakeOff(DroneMoveUP):
         return takeoff_msg.result
 
 class DroneChangeAlt(DroneMoveUP):
-    def execute(self, target_altitude, ascent_speed=5.0):
+    def execute(self, target_altitude, ascent_speed=8.0):
         print(f"Subindo para {target_altitude} metros com velocidade de {ascent_speed} m/s...")
 
         # Get the current altitude from the drone

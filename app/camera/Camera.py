@@ -15,7 +15,7 @@ class CameraConnection:
         return cv2.VideoCapture(int(self.source) if self.source.isdigit() else self.source)
         
 class CameraRTSP(CameraConnection):
-    source = 'rtsp://admin:admin@192.168.0.100:554/11'
+    source = 'rtsp://admin:admin@192.168.0.113:554/11'
 
 class CameraComputer(CameraConnection):
     source = '0'
@@ -109,7 +109,7 @@ class Camera:
         self.release_video_capture() # Libera a câmera após a captura
                     
     def clean_buffer(self):
-        for _ in range(40):  # Limpa os últimos 40 frames para garantir frescor
+        for _ in range(60):  
             self.cap.grab()
 
     def save_image(self, path):

@@ -110,7 +110,7 @@ class ArucoCentralizer:
             self.display_video()
 
     def display_video(self):
-        cv2.namedWindow('Drone Camera', cv2.WINDOW_NORMAL)
+        # cv2.namedWindow('Drone Camera', cv2.WINDOW_NORMAL)
         cv2.imshow('Drone Camera', self.camera.frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             return

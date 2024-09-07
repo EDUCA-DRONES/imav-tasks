@@ -22,7 +22,7 @@ class TaskThree(Task.Task):
         self.file_manager.create_base_dirs()
         self.camera = Camera()
         self.logger = FlightLogger()
-        self.camera_type = 'computer'
+        self.camera_type = 'rtsp'
 
         self.coordinates = [
             (-14.302302448845442, -42.69017646004376), 

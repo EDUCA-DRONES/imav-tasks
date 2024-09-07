@@ -26,9 +26,9 @@ class FileManager:
         cv2.imwrite(image_filename, frame)
         print(f"Imagem {index+1} capturada e salva em: {image_filename}")
         
-    def create_meta_data(self, lat, long, alt, real_alt, index):
+    def create_meta_data(self, lat, long, alt, real_alt, index, timestamp=None):
         self.timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
-        metadata_filename = f"{self.meta_path}/{index}.txt"
+        metadata_filename = f"{self.meta_path}/{index}-{timestamp}.txt"
         with open(metadata_filename, 'w') as metafile:
             metafile.write(f"Timestamp: {self.timestamp}\n")
             metafile.write(f"Latitude: {lat}\n")

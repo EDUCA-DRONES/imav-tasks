@@ -9,19 +9,19 @@ import math
 class DroneConfig:
     def __init__(self) -> None:
         self.GUIDED_MODE = 4
-        self.x_meters_cover = 6
-        self.y_meters_cover = 3
+        self.x_meters_cover = 12
+        self.y_meters_cover = 6
         
 # senha:101263
 class Drone:
     def __init__(self) -> None:
-        self.IP = '127.0.0.1'
-        self.PORT = '14551'
-        self.PROTOCOL = 'udpin'
+        # self.IP = '127.0.0.1'
+        # self.PORT = '14551'
+        # self.PROTOCOL = 'udpin'
         
-        # self.IP = '192.168.0.104'
-        # self.PORT = '5760'
-        # self.PROTOCOL = 'tcp'
+        self.IP = '192.168.0.104'
+        self.PORT = '5760'
+        self.PROTOCOL = 'tcp'
         
         self.URL = f'{self.PROTOCOL}:{self.IP}:{self.PORT}'
         self.baud = '57600'
