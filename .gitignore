@@ -3,3 +3,5 @@
 /mav.tlog
 /mav.tlog.raw
 *.pyc
+/imav-tasks
+/imav-tasks-venv

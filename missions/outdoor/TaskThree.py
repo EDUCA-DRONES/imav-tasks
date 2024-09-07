@@ -38,7 +38,7 @@ class TaskThree:
         CETEIA_LAT = -14.301307953176238
         CETEIA_LONG = -42.690438622705756
         try:
-
+            print("+ ========= INICIANDO TASK 3 ========= +")
             if not self.drone.connected():
                 print("Falha ao conectar com o drone.")
                 return
@@ -51,7 +51,7 @@ class TaskThree:
             self.drone.change_to_guided_mode()
             self.drone.arm_drone()
             self.drone.ascend(ALT_DRONE)
-            print(f"Chegou na altitude de {ALT_DRONE} ")
+            print(f"Chegou na altitude de {ALT_DRONE} m")
                 
             count = 1 # count é o id da zebra
             for lat, long in self.coordinates:

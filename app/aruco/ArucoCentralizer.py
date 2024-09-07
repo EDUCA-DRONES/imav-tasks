@@ -30,16 +30,19 @@ class ArucoCentralizer:
     
     
     def calculate_offset(self, center, image_shape):
+        print("calculate_offset()")
         image_center_x, image_center_y = image_shape[1] // 2, image_shape[0] // 2
         offset_x = center[0] - image_center_x
         offset_y = center[1] - image_center_y
         return offset_x, offset_y
 
     def detect_and_process_arucos(self):
+        print("Detectando ArUcos")
         ids, corners, centers = self.detect_arucos(self.camera.frame)
         return ids, centers
 
     def draw_reference_square(self):
+        print("Desenhando quadrado de referência na imagem")
         image_center_x, image_center_y = self.camera.frame.shape[1] // 2, self.camera.frame.shape[0] // 2
         cv2.rectangle(self.camera.frame, (image_center_x - self.INTEREST_REGION_PIXELS, image_center_y - self.INTEREST_REGION_PIXELS),
                       (image_center_x + self.INTEREST_REGION_PIXELS, image_center_y + self.INTEREST_REGION_PIXELS), self.GREEN, 2)
@@ -107,6 +110,7 @@ class ArucoCentralizer:
             self.display_video()
 
     def display_video(self):
+        cv2.namedWindow('Drone Camera', cv2.WINDOW_NORMAL)
         cv2.imshow('Drone Camera', self.camera.frame)
         if cv2.waitKey(1) & 0xFF == ord('q'):
             return

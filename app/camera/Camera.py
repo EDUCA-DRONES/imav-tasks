@@ -15,7 +15,7 @@ class CameraConnection:
         return cv2.VideoCapture(int(self.source) if self.source.isdigit() else self.source)
         
 class CameraRTSP(CameraConnection):
-    source = 'rtsp://admin:admin@192.168.0.110:554/11'
+    source = 'rtsp://admin:admin@192.168.0.100:554/11'
 
 class CameraComputer(CameraConnection):
     source = '0'
