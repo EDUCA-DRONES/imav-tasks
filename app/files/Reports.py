@@ -68,6 +68,7 @@ class DetectionsByAltReport(MetaSingleton):
                 file_path = os.path.join(folder_path, f'alt_{alt}.png')
                 plt.savefig(file_path)
                 plt.close()
+                
 class FlightLogger:
     def __init__(self, log_file='flight_log.csv'):
         self.log_file = log_file

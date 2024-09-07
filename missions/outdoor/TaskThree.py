@@ -1,12 +1,13 @@
+from missions.outdoor import Task
 import time
 from app.drone.Drone import Drone
 from app.camera.Camera import Camera
 from app.files.FileManager import FileManager
 from app.files.Reports import FlightLogger
 
-class TaskThree: 
+class TaskThree(Task.Task): 
     """
-    **Tarefa 3: Imagens Dinâmicas de Animais (idetificação das zebras e captura de imagens):**
+    **Tarefa 3: Imagens Dinâmicas de Animais (identificação das zebras e captura de imagens):**
 
     Nesta tarefa, quatro waypoints devem ser alcançados em uma sequência de waypoints desconhecida a priori. Após a chegada do drone designado para a tarefa no
     waypoint de início/fim da tarefa, o juiz distribuirá uma lista de waypoints em papel consistindo de quatro waypoints no formato [latitude decimal, longitude decimal, altitude acima do ponto inicial] que devem
@@ -35,8 +36,7 @@ class TaskThree:
 
     def run(self):
         ALT_DRONE = 12
-        CETEIA_LAT = -14.301307953176238
-        CETEIA_LONG = -42.690438622705756
+       
         try:
 
             if not self.drone.connected():
@@ -45,8 +45,7 @@ class TaskThree:
             
             self.starting_lat, self.starting_long, _ = self.drone.get_gps_position()
 
-            self.drone.set_home(CETEIA_LAT, CETEIA_LONG)
-            #self.drone.set_home(self.starting_lat, self.starting_long)
+            self.drone.set_home(self.starting_lat, self.starting_long)
 
             self.drone.change_to_guided_mode()
             self.drone.arm_drone()
@@ -115,5 +114,4 @@ class TaskThree:
         print(f"5 imagens capturadas e salvas para a coordenada da zebra: {zebra_id}")
       
 
-task = TaskThree()
-task.run()
+ 

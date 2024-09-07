@@ -2,8 +2,9 @@ import time
 from app.drone.Drone import Drone
 from app.camera.Camera import Camera
 from app.files.FileManager import FileManager
+from missions.outdoor import Task
 
-class TaskTwo: 
+class TaskTwo(Task.Task): 
     """
     **Tarefa 2: Censo de Animais (mapeamento e identificação):**
 
@@ -79,6 +80,3 @@ class TaskTwo:
         self.drone.adjust_position(-x, -y)
       
       
-
-task = TaskTwo()
-task.run()
