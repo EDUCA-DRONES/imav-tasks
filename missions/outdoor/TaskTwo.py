@@ -1,3 +1,4 @@
+from datetime import datetime
 import time
 from app.drone.Drone import Drone
 from app.camera.Camera import Camera
@@ -20,10 +21,12 @@ class TaskTwo(Task.Task):
         self.file_manager.create_base_dirs()
         self.camera = Camera()
         
-        self.camera_type = 'rtsp'
+        self.camera_type = 'computer'
         self.territory_x = 20
         self.territory_y = 20
-             
+            
+        self.camera_delay = 0.25
+        
     def run(self):
         try:
             x_loop = int(abs(self.territory_x / self.drone.config.x_meters_cover))
@@ -34,19 +37,35 @@ class TaskTwo(Task.Task):
                     return
 
             self.drone.change_to_guided_mode()
+            
+            starting_lat, starting_long, _ = self.drone.get_gps_position()
+
+            print(starting_lat, starting_long)
+            
+            self.camera.initialize_video_capture(self.camera_type)
+            
+            self.drone.set_home(starting_lat, starting_long)
             self.drone.arm_drone()
             self.drone.ascend(12)
-                
+            
             is_front = True
             count = 1
             for x in range(1, x_loop + 1):
                 if x != 1:
-                    self.inspect_animals(self.drone.config.x_meters_cover, 0, count)
+                    self.move_drone(self.drone.config.x_meters_cover * 2, 0)
+                    
                 for y in range(1, y_loop + 1):
                     if is_front:
-                        self.inspect_animals(0, self.drone.config.y_meters_cover, count)
+                        self.take_photos(count)
+                        self.move_drone(0, self.drone.config.y_meters_cover)
+                        self.take_photos(count)
+                        self.move_drone(0, self.drone.config.y_meters_cover)
                     else:
-                        self.inspect_animals(0, -self.drone.config.y_meters_cover, count)
+                        self.take_photos(count)
+                        self.move_drone(0, -self.drone.config.y_meters_cover)
+                        self.take_photos(count)
+                        self.move_drone(0, -self.drone.config.y_meters_cover)
+                        
                     count = count + 1
                 is_front = not is_front
         
@@ -57,27 +76,24 @@ class TaskTwo(Task.Task):
             print(e)
             
         finally:
-            pass
-            # self.drone.land()
-            # self.drone.disarm() 
-  
-    def inspect_animals(self, x, y, count):
+            self.drone.return_to_home()
+             
+    
+    def move_drone(self, x, y):
         x = x /  2 if x != 0 else 0
         y = y /  2 if y != 0 else 0
         
         self.drone.adjust_position(-x, -y)
         
-        self.camera.initialize_video_capture(self.camera_type)
-        
-        time.sleep(0.5)
+    def take_photos(self, count):
+        time.sleep(self.camera_delay)
         print(self.drone.get_gps_position())
         self.camera.read_capture()
-    
-        self.camera.save_image(f'imgs/map/img-{count}.jpg')
+        timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        self.camera.save_image(f'imgs/map/img-{count}-{timestamp}.jpg')
         lat, long, alt = self.drone.get_gps_position()
         self.file_manager.create_meta_data(lat, long, alt, self.drone.current_altitude(),count)
-        time.sleep(0.5)
         
-        self.drone.adjust_position(-x, -y)
+        
       
       

@@ -25,9 +25,7 @@ class TaskFour(Task.Task):
         self.target_altitude = None
 
         #self.altitude_above_start = altitude_above_start
-        self.starting_lat, self.starting_long, self.starting_alt = None, None, None
-
-       
+        self.starting_lat, self.starting_long, self.starting_alt = None, None, None       
 
     def run(self):
         ALT_DRONE = 12
