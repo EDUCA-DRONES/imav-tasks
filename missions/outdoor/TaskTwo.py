@@ -14,6 +14,7 @@ class TaskTwo(Task.Task):
     """
 
     def __init__(self) -> None:
+        print('Mission 2')
         self.drone = Drone()
         self.file_manager = FileManager('imgs/map/img', 'imgs/map/meta')
         self.file_manager.create_base_dirs()

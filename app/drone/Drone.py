@@ -27,7 +27,7 @@ class Drone:
         self.baud = '57600'
         # self.URL = f'/dev/ttyUSB0'
         self.METER_CONVERTER = 1000.0
-        self.conn =  mavutil.mavlink_connection(self.URL,baud= self.baud,  mav10=False)
+        self.conn =  mavutil.mavlink_connection(self.URL, baud=self.baud,  mav10=False)
         self.config = DroneConfig()
         self.velocity = 30
         self.gps = GPS()
@@ -321,3 +321,15 @@ class Drone:
         self.move_to_position(self.home_lat, self.home_long)
         print("Iniciando pouso")
         self.land()
+
+    def release_trap(self):
+        """
+        Aciona o mecanismo de liberação da armadilha.
+        """
+        try:
+            # COLOCAR CÓDIGO PARA ACIONAR O SERVO MOTOR E LIBERAR A ARMADILHA
+            print("Armadilha liberada com sucesso.")
+          
+
+        except Exception as e:
+            print(f"Erro ao liberar a armadilha: {e}")

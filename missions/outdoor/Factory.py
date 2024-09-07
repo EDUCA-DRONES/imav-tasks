@@ -1,6 +1,7 @@
 from missions.outdoor import TaskTwo
 from missions.outdoor import TaskThree
 from missions.outdoor import Task
+from missions.outdoor import TaskFour
 
 class TaskFactory:
     @staticmethod
@@ -8,6 +9,7 @@ class TaskFactory:
         tasks = {
             '2': TaskTwo.TaskTwo,
             '3': TaskThree.TaskThree,    
+            '4': TaskFour.TaskFour
         }
         
         if(not tasks.get(task, None)):

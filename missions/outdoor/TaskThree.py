@@ -16,6 +16,7 @@ class TaskThree(Task.Task):
     """
 
     def __init__(self) -> None:
+        print('Mission 3')
         self.drone = Drone()
         self.file_manager = FileManager('imgs/zebras_data/img', 'imgs/zebras_data/meta')
         self.file_manager.create_base_dirs()
@@ -38,7 +39,7 @@ class TaskThree(Task.Task):
         ALT_DRONE = 12
        
         try:
-
+            print("+ ========= INICIANDO TASK 3 ========= +")
             if not self.drone.connected():
                 print("Falha ao conectar com o drone.")
                 return
@@ -50,7 +51,7 @@ class TaskThree(Task.Task):
             self.drone.change_to_guided_mode()
             self.drone.arm_drone()
             self.drone.ascend(ALT_DRONE)
-            print(f"Chegou na altitude de {ALT_DRONE} ")
+            print(f"Chegou na altitude de {ALT_DRONE} m")
                 
             count = 1 # count é o id da zebra
             for lat, long in self.coordinates:

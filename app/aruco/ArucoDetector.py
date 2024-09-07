@@ -19,7 +19,7 @@ class ArucoDetector:
     def detect_arucos(self, image):
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
         
-        aruco_dict = aruco.getPredefinedDictionary(aruco.DICT_ARUCO_ORIGINAL)
+        aruco_dict = aruco.getPredefinedDictionary(aruco.DICT_5X5_1000)
         
         aruco_params = aruco.DetectorParameters()
         corners, ids, rejected = aruco.detectMarkers(gray, aruco_dict, parameters=aruco_params)
