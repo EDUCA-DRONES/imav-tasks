@@ -6,3 +6,4 @@ imgs/map/
 *.pyc
 /imav-tasks
 /imav-tasks-venv
+/calibration_imgs

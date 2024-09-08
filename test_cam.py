@@ -19,7 +19,8 @@ def main():
             camera.save_image(f'calibration_imgs/{datetime.now().strftime("%Y-%m-%d_%H-%M-%S")}.jpg')
             # cv2.imshow('Teste', camera.frame)
             cv2.waitKey(1)
-    except:
+    except Exception as e:
+        print(e)
         if camera.cap:
             camera.cap.release()
         

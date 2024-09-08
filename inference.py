@@ -3,10 +3,13 @@ from ultralytics import YOLO
 import cv2
 
 # Carregando um modelo personalizado
-model = YOLO('ml_model/best.pt')
+print('test')
+model = YOLO('ml_models/zebra.pt')
+print('test')
  
 # Lendo o vídeo
 cap = cv2.VideoCapture(0)
+print('test')
 
 # Verificando se o vídeo foi aberto corretamente
 if not cap.isOpened():
@@ -51,5 +54,6 @@ while True:
         break
 
 # Liberando o vídeo e fechando todas as janelas abertas
+
 cap.release()
 cv2.destroyAllWindows()
