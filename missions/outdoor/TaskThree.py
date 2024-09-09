@@ -86,10 +86,10 @@ class TaskThree(Task.Task):
             print(e)
             
         finally:
-            pass
+            #pass
             #self.drone.land()
             #self.drone.disarm() 
-            #self.drone.return_to_home()
+            self.drone.return_to_home()
   
     def capture_image(self, zebra_id):
         self.camera.initialize_video_capture(self.camera_type)

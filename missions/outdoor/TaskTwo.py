@@ -24,12 +24,17 @@ class TaskTwo(Task.Task):
         self.file_manager.create_base_dirs()
         self.camera = Camera()
 
-        self.camera_type = 'rtsp'
+        self.camera_type = 'computer'
         
         # Definindo as coordenadas do terreno
         self.boundaries = {
-            "upper_left": (-14.3024023, -42.6903888),  # Coordenadas do canto superior esquerdo
-            "lower_right": (-14.3036796, -42.6890734)  # Coordenadas do canto inferior direito
+            #"upper_left": (-14.3024023, -42.6903888),  # Coordenadas do canto superior esquerdo
+            #"lower_right": (-14.3036796, -42.6890734)  # Coordenadas do canto inferior direito
+            "upper_left": (-14.3014387, -42.6905811),  # Coordenadas do canto superior esquerdo
+            "lower_right": (-14.3026152, -42.6891587)  # Coordenadas do canto inferior direito
+            # -14.3014387, -42.6905811 # point 1, upper_left
+            # -14.3026152, -42.6891587 # point 3, lower_right
+
         }
         
         self.camera_delay = 0.25

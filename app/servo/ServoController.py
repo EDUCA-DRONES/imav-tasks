@@ -1,14 +1,18 @@
 from pymavlink import mavutil
+from app.drone.Drone import Drone
+import time
 
 class ServoController:
-    def __init__(self, connection_string, servo_channel=1):
+    def __init__(self, drone: Drone, servo_channel=7):
+
         """
         Inicializa a conexão com a Pixhawk e configura o canal do servo.
         
         :param connection_string: String de conexão MAVLink, por exemplo, 'udp:127.0.0.1:14550'
         :param servo_channel: Canal do servo na Pixhawk
         """
-        self.conn = mavutil.mavlink_connection(connection_string, baud=57600, mav10=False)
+        #self.conn = mavutil.mavlink_connection(connection_string, baud=57600, mav10=False)
+        self.conn = drone.conn
         self.servo_channel = servo_channel
         self.min_pwm = 1000  # PWM mínimo (normalmente 1ms)
         self.max_pwm = 2000  # PWM máximo (normalmente 2ms)
@@ -69,24 +73,76 @@ class ServoController:
         """
         pwm_value = self.angle_to_pwm(angle)
         print(f"Convertendo ângulo {angle} graus para PWM {pwm_value}")
+        #print(f"PWM correspondente ao ângulo: {angle} graus: PWM {pwm_value}")
         self.set_servo_pwm(pwm_value)
         print(f"Ângulo do servo configurado para {angle} graus")
 
+    def activate_servo(self, angle):
+        try:
+            print("Acionando o servo...")
+            pwm_value = self.angle_to_pwm(angle)
+            print(f"PWM correspondente ao ângulo: {angle} graus: PWM {pwm_value}")
+
+            
+            if pwm_value == 2000:
+                print("O servo está girando no sentido horário")
+            elif pwm_value == 1000:
+                print("O servo está girando no sentido anti-horário")
+
+
+            self.conn.mav.command_long_send(
+                self.conn.target_system,
+                self.conn.target_component,
+                mavutil.mavlink.MAV_CMD_DO_SET_SERVO,
+                0,  # confirmation
+                self.servo_channel,  # Canal do servo
+                pwm_value,  # PWM para ativar o servo (ajuste conforme necessário)
+                0, 0, 0, 0, 0, 0
+            )
+
+            if pwm_value == 1500:
+                print("O servo parou de se mover")
+                #print("Servo acionado.")
+            
+        
+        except Exception as e:
+            print(f"Ocorreu um erro: {e}")
+
+    def release_trap(self):
+        """
+        Aciona o mecanismo de liberação da armadilha.
+        """
+        try:
+            
+            self.activate_servo(180)
+
+            time.sleep(15)
+            print("Armadilha liberada com sucesso.")
+
+            self.activate_servo(90)
+
+        except Exception as e:
+            print(f"Erro ao liberar a armadilha: {e}")
   
 
 if __name__ == "__main__":
-    servo_controller = ServoController('/dev/serial/by-id/usb-ArduPilot_Pixhawk1-1M_3E0039001651343037373231-if00')  # Substitua pelo seu endereço de conexão
-    #/dev/serial/by-id/usb-ArduPilot Pixhawk1-1M 3E0039001651343037373231-if00
+   
     try:
-        servo_controller = ServoController('/dev/serial/by-id/usb-ArduPilot_Pixhawk1-1M_3E0039001651343037373231-if00')  # Substitua pelo seu endereço de conexão
-        angle = 90
-        servo_controller.set_servo_angle(angle)
+        drone = Drone()
+        #servo_controller = ServoController('/dev/serial/by-id/usb-ArduPilot_Pixhawk1-1M_3E0039001651343037373231-if00')  # Substitua pelo seu endereço de conexão
+        # angle = 90
+        # servo_controller.set_servo_angle(angle)
 
-        pwm_value = 1500
-        servo_controller.set_servo_pwm(pwm_value)
+        # pwm_value = 1500
+        # servo_controller.set_servo_pwm(pwm_value)
 
-        angle_from_pwm = servo_controller.pwm_to_angle(pwm_value)
-        print(f"Ângulo correspondente ao PWM {pwm_value}: {angle_from_pwm} graus")
+        # angle_from_pwm = servo_controller.pwm_to_angle(pwm_value)
+        # print(f"Ângulo correspondente ao PWM {pwm_value}: {angle_from_pwm} graus")
+
+
+        print("Utilizando activate-servo()")
+        #servo_controller.activate_servo(180)
+        servo_controller.release_trap()
 
     except Exception as e:
         print(f"Ocorreu um erro: {e}")

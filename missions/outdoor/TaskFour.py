@@ -15,21 +15,24 @@ class TaskFour(Task.Task):
         self.camera = Camera()  # Assumindo que você tenha uma classe Camera
         self.aruco_detector = ArucoDetector()
         self.aruco_centralizer = ArucoCentralizer(self.drone, self.camera)
-        self.aruco_id = 100
+        self.aruco_id = 105
+        self.servo = ServoController(self.drone)
 
         #self.delivery_system = ArUcoDeliverySystem(self.drone, self.camera)
-        self.camera_type = 'rtsp'
+        self.camera_type = 'computer'
         
-        self.target_lat = -14.3024719 # Latitude para colocar a armadilha
-        self.target_long = -42.6896867 # Longitude para colocar a armadilha
-        self.target_altitude = None
+        #self.target_lat = -14.3024719 # Latitude para colocar a armadilha
+        #self.target_long = -42.6896867 # Longitude para colocar a armadilha
+        
+        self.target_lat = -14.3014358
+        self.target_long = -42.6902904
+        self.target_altitude = 12
 
         #self.altitude_above_start = altitude_above_start
         self.starting_lat, self.starting_long, self.starting_alt = None, None, None       
 
     def run(self):
-        ALT_DRONE = 12
-   
+
         try:
             print("+ ========= INICIANDO TASK 4 ========= +")
             if not self.drone.connected():
@@ -42,8 +45,8 @@ class TaskFour(Task.Task):
 
             self.drone.change_to_guided_mode()
             self.drone.arm_drone()
-            self.drone.ascend(ALT_DRONE)
-            print(f"Chegou na altitude de {ALT_DRONE} ")
+            self.drone.ascend(self.target_altitude)
+            print(f"Chegou na altitude de {self.target_altitude} ")
 
             success = self.drone.move_to_position(self.target_lat, self.target_long)
             if not success:
@@ -63,9 +66,8 @@ class TaskFour(Task.Task):
 
             # Passo 3: Liberar a armadilha e retornar para a posição inicial
             print("Liberando armadilha...")
-            self.drone.release_trap()
+            self.servo.release_trap()
             print("Retornando para a posição inicial...")
-            self.drone.return_to_home()
 
 
 
@@ -78,9 +80,10 @@ class TaskFour(Task.Task):
             print(e)
 
         finally:
-            #pass
-            self.drone.land()
-            self.drone.disarm()
+            # pass
+            # self.drone.land()
+            # self.drone.disarm()
+            self.drone.return_to_home()
 
     
     def centralize_and_adjust_altitude(self, target_altitude: float, max_attempts: int = 10) -> bool:
@@ -95,33 +98,60 @@ class TaskFour(Task.Task):
         aruco_found = False
 
         # Tenta encontrar e centralizar o ArUco até o número máximo de tentativas
-        while attempts < max_attempts and not aruco_found:
-            print(f"Tentativa {attempts+1}/{max_attempts}")
+        while True and not aruco_found:
+            #print(f"Tentativa {attempts+1}/{max_attempts}")
             self.camera.read_capture()
-            self.aruco_centralizer.display_video()
+            #print("self.camera.read_capture() executado")
             
             ids, centers = self.aruco_centralizer.detect_and_process_arucos()
             self.aruco_centralizer.draw_reference_square()
+            # self.aruco_centralizer.display_video()
 
-            if ids is not None and self.aruco_id in ids:
-                print("ArUco encontrado, tentando centralizar.")
-                center_index = list(ids).index(self.aruco_id)
-                center = centers[center_index]
-                offset_x, offset_y = self.aruco_centralizer.calculate_offset(center, self.camera.frame.shape)
-                distance_pixels = (offset_x**2 + offset_y**2)**0.5
-                color = self.aruco_centralizer.GREEN if distance_pixels <= self.aruco_centralizer.INTEREST_REGION_PIXELS else self.aruco_centralizer.RED
+            # print(f"ids: {ids}")
+            #print("Seis segundos até a próxima tentativa \n")
+            #time.sleep(6)
+            if ids is not None:
+                print(f"IDs detectados: {ids}")
+                if self.aruco_id in ids:
 
-                # Se a centralização for bem-sucedida, ajusta a altitude e finaliza
-                if self.aruco_centralizer.adjust_drone_position(center, offset_x, offset_y, distance_pixels, color):
-                    print(f"Ajustando altitude para {target_altitude} metros...")
-                    self.drone.descend(target_altitude)
-                    aruco_found = True  # Marca que o ArUco foi encontrado e centralizado
+                    print("ArUco encontrado, tentando centralizar.")
+                    center_index = list(ids).index(self.aruco_id)
+                    center = centers[center_index]
+                    offset_x, offset_y = self.aruco_centralizer.calculate_offset(center, self.camera.frame.shape)
+                    distance_pixels = (offset_x**2 + offset_y**2)**0.5
+                    color = self.aruco_centralizer.GREEN if distance_pixels <= self.aruco_centralizer.INTEREST_REGION_PIXELS else self.aruco_centralizer.RED
+
+                    # Debug: Verificar o que o método adjust_drone_position está retornando
+                    adjustment_success = self.aruco_centralizer.adjust_drone_position(center, offset_x, offset_y, distance_pixels, color)
+                    print(f"Ajuste do drone bem-sucedido: {adjustment_success}")
+
+                    # Se a centralização for bem-sucedida, ajusta a altitude e finaliza
+                    if adjustment_success:
+                        current_altitude = self.drone.current_altitude()
+                        print(f"Altura atual do drone: {current_altitude}")
+
+                        print(f"Ajustando altitude para {target_altitude} metros...")
+                        self.drone.descend(target_altitude)
+                        aruco_found = True  # Marca que o ArUco foi encontrado e centralizado
+
+                        #print("Pegando coordenadas ao centralizar o aruco")
+                        #aruco_center_img_lat, aruco_center_img_lon, aruco_center_img_alt = self.drone.get_gps_position()
+                        
+                        #self.drone.move_to_position(aruco_center_img_lat, aruco_center_img_lon)
+                        # Verifica se a altitude foi atingida antes de prosseguir
+                        if not self.drone.wait_until_altitude_reached(target_altitude):
+                            print(f"Falha ao atingir a altitude de {target_altitude} metros. Abortando...")
+                            return False
+             
+                else:
+                    print("ArUco id 100 não detectado nesta tentativa.")
             else:
-                print("ArUco não encontrado nesta tentativa.")
+                print("Nenhum ArUco não encontrado nesta tentativa.")
 
             #self.aruco_centralizer.display_video()
             attempts += 1
 
+        self.camera.release_video_capture()
         if aruco_found:
             print("Centralização e ajuste de altitude completos.")
             return True
@@ -140,9 +170,10 @@ class TaskFour(Task.Task):
                 print("Tempo esgotado para o passo 1. Não foi possível centralizar o drone.")
                 return False
         print("Passo 1 concluído.")
+        
         return True
 
-    def perform_step_two(self, target_altitude: float = 0.5):
+    def perform_step_two(self, target_altitude: float = 1.5):
         """
         Realiza o passo 2: Centraliza o ArUco novamente e ajusta a altitude do drone para 0.5 metros.
         """
