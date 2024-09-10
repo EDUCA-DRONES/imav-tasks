@@ -3,6 +3,7 @@ import time
 from app.drone.Drone import Drone
 from app.camera.Camera import Camera
 from app.files.FileManager import FileManager
+from app.ml import ZebraModel
 from missions.outdoor import Task
 import cv2
 import os
@@ -23,13 +24,16 @@ class TaskTwo(Task.Task):
         self.file_manager = FileManager('imgs/map/img', 'imgs/map/meta')
         self.file_manager.create_base_dirs()
         self.camera = Camera()
-
-        self.camera_type = 'rtsp'
+        self.zebra_detector = ZebraModel.ZebraModel()
+        
+        self.camera_type = 'computer'
         
         # Definindo as coordenadas do terreno
         self.boundaries = {
-            "upper_left": (-14.3024023, -42.6903888),  # Coordenadas do canto superior esquerdo
-            "lower_right": (-14.3036796, -42.6890734)  # Coordenadas do canto inferior direito
+            # "upper_left": (-14.3024023, -42.6903888), 
+            # "lower_right": (-14.3036796, -42.6890734) 
+            "upper_left": (-14.3014387, -42.6905811), 
+            "lower_right": (-14.3026152, -42.6891587) 
         }
         
         self.camera_delay = 0.25
@@ -79,7 +83,7 @@ class TaskTwo(Task.Task):
                     
                     adjusted = False
                     while not self.is_within_latitude_boundaries():
-                        x_cover = 1
+                        x_cover = 2
                         if is_front:
                             x_cover = -x_cover
 
@@ -128,11 +132,12 @@ class TaskTwo(Task.Task):
         self.camera.clean_buffer()
         self.camera.read_capture()
         timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+        quantity = self.zebra_detector.detect(self.camera.frame)
         img_name = f'imgs/map/img/img-{str(count).zfill(2)}-{timestamp}.jpg'
         self.camera.save_image(img_name)
         print(img_name)
         lat, long, alt = self.drone.get_gps_position()
-        self.file_manager.create_meta_data(lat, long, alt, self.drone.current_altitude(), count, timestamp)
+        self.file_manager.create_meta_data(lat, long, alt, self.drone.current_altitude(), count, timestamp, quantity)
 
     def is_within_latitude_boundaries(self):
         """
@@ -143,7 +148,6 @@ class TaskTwo(Task.Task):
         lat_lower, _ = self.boundaries["lower_right"]
 
         return lat_lower <= current_lat <= lat_upper
-
 
     def is_within_longitude_boundaries(self):
         """
