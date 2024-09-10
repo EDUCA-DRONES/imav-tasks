@@ -11,7 +11,7 @@ class ArucoDetector:
     def __init__(self) -> None:
         self.ids = []
         self.corners = []
-        self.aruco_dict = aruco.getPredefinedDictionary(aruco.DICT_ARUCO_ORIGINAL)
+        self.aruco_dict = aruco.getPredefinedDictionary(aruco.DICT_5X5_1000)
         self.aruco_params = aruco.DetectorParameters()
         self.aruco_size = 0.10
 

@@ -3,6 +3,7 @@ from app.drone.Drone import Drone
 from app.camera.Camera import Camera
 from app.aruco.ArucoDetector import ArucoDetector
 from cv2 import aruco
+import matplotlib.pyplot as plt
 
 class ArucoCentralizer:
     def __init__(self, drone: Drone, camera: Camera):
@@ -16,7 +17,7 @@ class ArucoCentralizer:
 
     def detect_arucos(self, image):
         gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
-        aruco_dict = aruco.getPredefinedDictionary(aruco.DICT_ARUCO_ORIGINAL)
+        aruco_dict = aruco.getPredefinedDictionary(aruco.DICT_5X5_1000)
         aruco_params = aruco.DetectorParameters()
         corners, ids, rejected = aruco.detectMarkers(gray, aruco_dict, parameters=aruco_params)
         centers = []
@@ -30,10 +31,17 @@ class ArucoCentralizer:
     
     
     def calculate_offset(self, center, image_shape):
-        print("calculate_offset()")
+        print("Calculando offset")
+
         image_center_x, image_center_y = image_shape[1] // 2, image_shape[0] // 2
+        print(f"Centro da imagem: ({image_center_x}, {image_center_y})")
+
+
         offset_x = center[0] - image_center_x
         offset_y = center[1] - image_center_y
+        print(f"Centro do marcador ArUco: {center}")
+        print(f"Deslocamento: (x: {offset_x}, y: {offset_y})")
+        
         return offset_x, offset_y
 
     def detect_and_process_arucos(self):
@@ -49,7 +57,9 @@ class ArucoCentralizer:
 
     def adjust_drone_position(self, center, offset_x, offset_y, distance_pixels, color):
         CONVERSION_FACTOR = 0.17 / 25
-        print(self.count)
+        print(f"self.count: {self.count}")
+
+        print(f"Distância em pixels: {distance_pixels}, Região de interesse: {self.INTEREST_REGION_PIXELS}")
         if distance_pixels > self.INTEREST_REGION_PIXELS and self.count > self.MIN_COUNT:
             print('\n--------------\n')
             print(f"Distância em pixels: {distance_pixels}, Distância em metros: {distance_pixels * CONVERSION_FACTOR}")
@@ -62,16 +72,30 @@ class ArucoCentralizer:
             self.drone.adjust_position(offset_x, offset_y)
             self.count = 0
             
-            
-        elif self.count > 25:
+            #print('ArUco Centralizado...')
+            #return True
+        
+        elif distance_pixels <= self.INTEREST_REGION_PIXELS and self.count > self.MIN_COUNT:
             
             print('ArUco Centralizado...')
             # if self.drone.current_altitude() < 1.5:
             return True
             # self.drone.descend(self.drone.current_altitude() - 0.5)
             # print(f'Altitude: {self.drone.current_altitude()}')
+            
+        else:
+            # Mensagens de debug para entender porque a condição não está sendo atendida
+            #if distance_pixels <= self.INTEREST_REGION_PIXELS:
+             #   print(f"Distância em pixels ({distance_pixels}) não excede a região de interesse ({self.INTEREST_REGION_PIXELS}).")
+            if self.count <= self.MIN_COUNT:
+                print(f"Contador ({self.count}) não excede o mínimo ({self.MIN_COUNT}).")
+                self.count += 1
+
         
         return False
+        
+            
+        
 
     def read_and_verify_capture(self):
         self.camera.read_capture()
@@ -82,7 +106,7 @@ class ArucoCentralizer:
     def execute(self):
         
         for i in range(0,200):
-            print('Ajustando camera...')
+            print(f'{i+1}-Ajustando camera...')
             self.camera.read_capture()
             
         while True:
@@ -93,6 +117,7 @@ class ArucoCentralizer:
 
             ids, centers = self.detect_and_process_arucos()
             self.draw_reference_square()
+            print(f"ArucoCentralizer - ids: {ids}")
 
             if ids is not None:
                 for i, center in enumerate(centers):
@@ -107,11 +132,13 @@ class ArucoCentralizer:
                         
                     break
 
-            self.display_video()
+            #self.display_video()
 
     def display_video(self):
         # cv2.namedWindow('Drone Camera', cv2.WINDOW_NORMAL)
-        cv2.imshow('Drone Camera', self.camera.frame)
+        plt.imshow(cv2.cvtColor(self.camera.frame, cv2.COLOR_BGR2RGB))
+        plt.axis('off')
+        plt.show()
         if cv2.waitKey(1) & 0xFF == ord('q'):
             return
     
