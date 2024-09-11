@@ -20,17 +20,17 @@ class DroneConfig:
 # senha:101263
 class Drone:
     def __init__(self) -> None:
-        #self.IP = '127.0.0.1'
-        #self.PORT = '14551'
-        #self.PROTOCOL = 'udpin'
+        self.IP = '127.0.0.1'
+        self.PORT = '14551'
+        self.PROTOCOL = 'udpin'
         
         # self.IP = '192.168.0.103'
         # self.PORT = '5760'
         # self.PROTOCOL = 'tcp'
         
-        self.URL = f'/dev/serial/by-id/usb-ArduPilot_Pixhawk1-1M_3E0039001651343037373231-if00'
+        #self.URL = f'/dev/serial/by-id/usb-ArduPilot_Pixhawk1-1M_3E0039001651343037373231-if00'
 
-        #self.URL = f'{self.PROTOCOL}:{self.IP}:{self.PORT}'
+        self.URL = f'{self.PROTOCOL}:{self.IP}:{self.PORT}'
         self.baud = '57600'
         # self.URL = f'/dev/ttyUSB0'
         self.METER_CONVERTER = 1000.0
@@ -115,8 +115,7 @@ class Drone:
             0, 0, 0,  # Componentes de aceleração (ignorado)
             0, 0  # Yaw, yaw_rate (ignorado)
         )
-            
-    
+             
     def land(self):
         print("Comando de pouso enviado ao drone.")
         
@@ -134,8 +133,7 @@ class Drone:
                 break; 
             
         print('Desceu com crtz')
-        
-    
+         
     def set_mode(self, mode):
         if mode not in self.conn.mode_mapping():
             print("Modo desconhecido:", mode)
@@ -156,7 +154,6 @@ class Drone:
             if ack_msg == 'ACCEPTED':
                 break
         print(f"Modo alterado para {mode}")
-
 
     def disarm(self):
         print("Desarmando o drone.")
@@ -259,15 +256,13 @@ class Drone:
 
         self.conn.mav.send(msg)
         # self.conn.flush()
-        
-        
+             
     def move_direction(self, north, east, down):
         """
         Moves the drone in the specified direction.
         """
         print(f"Moving NED for {north}m north, {east}m east, {down}m down")
-        self.set_velocity_body(north, east, down)
-        
+        self.set_velocity_body(north, east, down)     
 
     def adjust_position(self, offset_x, offset_y, sensitivity=0.01):
         move_x = offset_x
@@ -345,7 +340,6 @@ class Drone:
         r = 6371  # Raio da Terra em quilômetros
         return r * c * 1000  # Converter para metros
 
-
     def set_home(self, lat, long):
         self.home_lat = lat
         self.home_long = long
@@ -361,8 +355,7 @@ class Drone:
         print("Iniciando pouso")
         self.land()
         self.disarm() 
-
-    
+ 
     def wait_until_altitude_reached(self, target_altitude: float, tolerance: float = 0.5, timeout: float = 90.0, resend_interval: float = 5.0) -> bool:
         """
         Espera até que o drone atinja a altitude desejada, com uma tolerância opcional.
@@ -495,28 +488,13 @@ class Drone:
             0, 0, 0,  # Velocidade angular (pode ser deixada como 0)
             thrust  # Empuxo (normalizado entre 0 e 1)
         )
-            
-    
-    def rotate_yaw(self, angle_degrees, duration=5):
-        """
-        Rotaciona o drone em torno do eixo yaw por um ângulo específico.
-        """
-        # Converte o ângulo de graus para radianos
-        angle_radians = angle_degrees * (3.14159 / 180.0)
-        
-        # Obtém a orientação atual
-        attitude = self.conn.recv_match(type='ATTITUDE', blocking=True)
-        current_yaw = attitude.yaw
-        
-        # Define o novo yaw baseado na rotação desejada
-        target_yaw = current_yaw + angle_radians
-        
-        # Envia o comando de rotação
-        start_time = time.time()
-        while time.time() - start_time < duration:
-            # Ajuste o comando conforme necessário para sua aplicação
-            self.send_attitude_control(0, 0.1, target_yaw, 1)  # Roll e pitch são 0, thrust é ajustável
-            time.sleep(1)  # Espera 1 segundo antes de enviar o próximo comando
+               
+    def rotate_yaw(self, yaw_angle_deg):
+        # Gira o drone no eixo yaw em graus
+        yaw_rate = yaw_angle_deg * (3.14159 / 180)  # Converte graus para radianos
+        duration = 2  # Tempo em segundos (ajuste conforme necessário)
+        self.send_movement_command(vx=0, vy=0, vz=1.5, yaw_rate=yaw_rate, duration=duration)
+
 
     def adjust_roll(self, angle_degrees, duration=5):
         """
@@ -539,43 +517,29 @@ class Drone:
             self.send_attitude_control(target_roll, 0, 0, 1)  # Roll é ajustado, pitch e yaw são 0, thrust é ajustável
             time.sleep(1)  # Espera 1 segundo antes de enviar o próximo comando
 
+    def send_movement_command(self, vx, vy, vz, yaw_rate, duration):
+        # Envia comando de movimento com velocidade em m/s e taxa de yaw
+        print("Movendo o drone...")
+        for _ in range(duration):
+            self.conn.mav.set_position_target_local_ned_send(
+                0,
+                self.conn.target_system,
+                self.conn.target_component,
+                mavutil.mavlink.MAV_FRAME_LOCAL_NED,
+                int(0b110111111000),  # Controla posição e yaw
+                0, 0, 0,  # Não altera posição (apenas velocidade)
+                vx, vy, vz,  # Velocidade nos eixos x, y, z
+                0, 0, 0,  # Acelerações (não são usadas aqui)
+                yaw_rate,  # Taxa de rotação no yaw (rad/s)
+                0  # Yaw rate
+            )
+            time.sleep(1)
 
+    def move_forward(self, distance_meters, speed_mps):
+        # Move o drone para frente uma distância específica
+        duration = int(distance_meters / speed_mps)
+        self.send_movement_command(vx=speed_mps, vy=0, vz=0, yaw_rate=0, duration=duration)
 
-    def send_movement_command(self, forward_speed, altitude=None):
-        """
-        Envia um comando de movimento para o drone.
-        """
-        print("Enviando comando de mavimetno para o drone")
-        # Preenche o comando de movimento em modo GUIDED
-        self.conn.mav.set_position_target_local_ned_send(
-            0,                      # time_boot_ms
-            self.conn.target_system,  # system_id
-            self.conn.target_component,  # component_id
-            mavutil.mavlink.MAV_FRAME_LOCAL_NED,  # frame
-            int(0b110111111000),  # tipo de controle: posição, velocidade, aceleração, etc.
-            0,  # x (norte) - movimento para frente
-            0,  # y (leste) - não mover lateralmente
-            altitude if altitude is not None else 0,  # z (altitude) - não alterar altitude
-            forward_speed,  # velocidade para frente (m/s)
-            0,  # velocidade lateral
-            0,  # velocidade vertical
-            0,  # aceleração na direção x
-            0,  # aceleração na direção y
-            0,  # aceleração na direção z
-            0,  # yaw
-            0,  # velocidade de rotação do yaw
-        )
-
-    def move_forward(self, speed_mps):
-        """
-        Move o drone para frente com a velocidade especificada.
-        """
-        print(f"Move forward a {speed_mps}mps")
-        # Ajusta a velocidade de movimento para frente
-        self.send_movement_command(speed_mps)
-
-        # Adiciona um pequeno atraso para garantir que o comando seja processado
-        time.sleep(1)  # Ajuste conforme necessário
 
     def check_and_adjust_altitude(self, desired_altitude):
         """

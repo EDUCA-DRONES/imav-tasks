@@ -1,5 +1,5 @@
 from ultralytics import YOLO
-import cv2
+import cv2000000000000000
  
 class ZebraModel:
     def __init__(self, path = 'ml_models/zebra.pt') -> None:

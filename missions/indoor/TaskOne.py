@@ -44,15 +44,15 @@ class TaskOne(Task.Task):
                 return
 
             self.drone.change_to_guided_mode()
-            starting_lat, starting_long, _ = self.drone.get_gps_position()
-            print(f"Posição inicial: {starting_lat}, {starting_long}")
+            # starting_lat, starting_long, _ = self.drone.get_gps_position()
+            # print(f"Posição inicial: {starting_lat}, {starting_long}")
 
             self.camera.initialize_video_capture(self.camera_type)
 
             # Levanta voo e move para a zona de tarefa
-            self.drone.set_home(starting_lat, starting_long)
+            # self.drone.set_home(starting_lat, starting_long)
             self.drone.arm_drone()
-            self.drone.ascend(self.capture_height + 2)  # Subir um pouco mais para garantir a segurança
+            self.drone.ascend(self.capture_height)  # Subir um pouco mais para garantir a segurança
             #self.drone.move_to_marker(self.zone_marker_id)
 
             print("Iniciando a tarefa de seguir a fita azul...")

@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+from datetime import datetime
 import time
 from app.drone.Drone import Drone
 from app.camera.Camera import Camera
@@ -26,6 +27,13 @@ class FollowTape:
             frame = self.camera.frame
             mask = self._create_blue_mask(frame)
             largest_contour = self._find_largest_contour(mask)
+            #timestamp = datetime.now().strftime('%Y-%m-%d_%H-%M-%S')
+            # self.camera.save_image(f'imgs/indoor/task1/img-largest_contour_{timestamp}.jpg')
+            #cv2.imwrite(f'imgs/indoor/task1/img-largest_contour_{timestamp}.jpg', largest_contour)
+            #cv2.imwrite(f'imgs/indoor/task1/img-mask-{timestamp}.jpg', mask)
+
+
+
             
             if largest_contour is not None:
                 cX, cY = self._calculate_contour_center(largest_contour)
@@ -34,13 +42,13 @@ class FollowTape:
             else:
                 self._adjust_roll_and_move_forward()
 
-            plt.imshow(cv2.cvtColor(self.camera.frame, cv2.COLOR_BGR2RGB))
-            plt.axis('off')
-            plt.show()
-            if cv2.waitKey(1) & 0xFF == ord('q'):
-                return
+            #plt.imshow(cv2.cvtColor(mask, cv2.COLOR_BGR2RGB))
+            #plt.axis('off')
+            #plt.show()
+            #if cv2.waitKey(1) & 0xFF == ord('q'):
+                #return
                 
-            print("\n\n")
+            print("\n")
             # Adiciona uma pausa para evitar loop excessivo
             #time.sleep(0.5)
 
@@ -81,6 +89,7 @@ class FollowTape:
         if abs(error_x) > self.roll_threshold:
             print("Ajustando o roll")
             roll_adjustment = self.roll_adjustment if error_x > 0 else -self.roll_adjustment
+            print(f"roll_adjustment: {roll_adjustment}")
             self.drone.adjust_roll(roll_adjustment)
         else:
             print(f"Movendo {self.move_forward_distance} m para frente ")

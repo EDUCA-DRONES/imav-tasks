@@ -68,8 +68,10 @@ class Camera:
         self.cap = camera.connection()
         # self.cap.set(cv2.CAP_PROP_BUFFERSIZE, 1)
         
-        if not self.cap or not self.cap.isOpened():
-            print("Falha ao abrir a captura de vídeo.")
+        if self.cap is None or not self.cap.isOpened():
+            raise RuntimeError("Falha ao abrir a captura de vídeo. Verifique a conexão com a câmera.")
+        else:
+            print("Captura de vídeo inicializada com sucesso.")
         
     def read_capture(self):
         self.ret = None
@@ -120,3 +122,29 @@ class Camera:
             self.cap.release()
             self.cap = None
             print("Captura de vídeo liberada.")
+
+    def display_video(self):
+        # Verifica se a captura de vídeo foi inicializada corretamente
+        if self.cap is None or not self.cap.isOpened():
+            print("Erro: Captura de vídeo não inicializada.")
+            return
+        
+        # Loop para exibir o vídeo capturado
+        while True:
+            ret, self.frame = self.cap.read()
+            if not ret:
+                print("Falha ao capturar o frame. Verifique a câmera.")
+                break
+            
+            # Exibe o frame capturado
+            if self.frame is not None and self.frame.size > 0:
+                print("Iniciando exibição de video da câmera")
+                #cv2.imshow("Camera Video", self.frame)
+            else:
+                print("Falha ao capturar o frame. Verifique a câmera.")
+            
+            # Destroi todas as janelas quando finalizar
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+
+        cv2.destroyAllWindows()

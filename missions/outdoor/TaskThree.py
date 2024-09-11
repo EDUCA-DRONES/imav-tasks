@@ -22,7 +22,7 @@ class TaskThree(Task.Task):
         self.file_manager.create_base_dirs()
         self.camera = Camera()
         self.logger = FlightLogger()
-        self.camera_type = 'rtsp'
+        self.camera_type = 'computer'
 
         self.coordinates = [
             (-14.302302448845442, -42.69017646004376), 
@@ -105,7 +105,7 @@ class TaskThree(Task.Task):
             self.camera.save_image(f'imgs/zebras_data/img/{IMAGE_NAME}')
             self.camera.clean_buffer()
             self.file_manager.create_meta_data(lat, long, alt, self.drone.current_altitude(), f"{zebra_id}_{i}")            
-            self.logger.log_position(zebra_id, i, lat, long, alt, IMAGE_NAME)
+            self.logger.log_position(zebra_id, i, lat, long, self.drone.current_altitude(), IMAGE_NAME)
 
             time.sleep(0.5)
 

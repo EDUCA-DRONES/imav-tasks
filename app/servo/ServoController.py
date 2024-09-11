@@ -129,7 +129,7 @@ class ServoController:
         Define o PWM para o valor neutro (geralmente 1500).
         """
         try:
-            print("Parando o servo em emergência...")
+            print("Parando o servo...")
 
             # Envia o comando para parar o servo
             self.conn.mav.command_long_send(
@@ -153,14 +153,14 @@ class ServoController:
         """
         try:
             # Movendo para o sentido horário (enrolando)
-            print("Iniciando enrolamento...")
-            self.activate_servo(150, 'clockwise')  # Enrola até 150 graus
-            time.sleep(5)
+            #print("Iniciando enrolamento...")
+            #self.activate_servo(150, 'clockwise')  # Enrola até 150 graus
+            #time.sleep(5)
 
             # Movendo para o sentido anti-horário (desenrolando)
             print("Iniciando desenrolamento...")
             self.activate_servo(30, 'counterclockwise')  # Desenrola até 30 graus
-            time.sleep(5)
+            time.sleep(30)
 
             # Parando o servo
             self.stop_servo()
