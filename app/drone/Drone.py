@@ -28,7 +28,7 @@ class Drone:
         # self.PORT = '5760'
         # self.PROTOCOL = 'tcp'
         
-        #self.URL = f'/dev/serial/by-id/usb-ArduPilot_Pixhawk1-1M_3E0039001651343037373231-if00'
+        # self.URL = f'/dev/serial/by-id/usb-ArduPilot_Pixhawk1-1M_3E0039001651343037373231-if00'
 
         self.URL = f'{self.PROTOCOL}:{self.IP}:{self.PORT}'
         self.baud = '57600'
@@ -39,6 +39,7 @@ class Drone:
         self.velocity = 30
         self.gps = GPS()
         #self.servo = ServoController()
+
 
         self.home_lat = None
         self.home_long = None
@@ -239,7 +240,7 @@ class Drone:
     def move_west(self, distance, velocity=0.5):
         self.move('west', distance, velocity)
 
-    def go_to_coord(self, new_lat, new_long, alt_return=12):
+    def go_to_coord(self, new_lat, new_long, alt_return=15):
       
         # Enviar comando para ir para a nova coordenada
         msg = mavutil.mavlink.MAVLink_set_position_target_global_int_message(
@@ -356,7 +357,7 @@ class Drone:
         self.land()
         self.disarm() 
  
-    def wait_until_altitude_reached(self, target_altitude: float, tolerance: float = 0.5, timeout: float = 90.0, resend_interval: float = 5.0) -> bool:
+    def wait_until_altitude_reached(self, target_altitude: float, tolerance: float = 0.5, timeout: float = 120.0, resend_interval: float = 5.0) -> bool:
         """
         Espera até que o drone atinja a altitude desejada, com uma tolerância opcional.
         
@@ -406,7 +407,9 @@ class Drone:
             #     last_command_time = time.time()
 
             time.sleep(1)  # Aguardar 1 segundo antes de verificar novamente
-
+            if start_time == 100:
+                print(f"Passaram-se {start_time} segundos")
+        
         print(f"Falha ao atingir a altitude desejada de {target_altitude} metros dentro do tempo limite.")
         return False
 

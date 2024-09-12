@@ -28,6 +28,8 @@ class TaskFour(Task.Task):
         self.target_long = -42.6902904
         self.target_altitude = 12
 
+        self.target_pre_step_altitude = 7.0
+
         #self.altitude_above_start = altitude_above_start
         self.starting_lat, self.starting_long, self.starting_alt = None, None, None       
 
@@ -57,6 +59,15 @@ class TaskFour(Task.Task):
             
             print("Aguarde 5 segundos")
             time.sleep(5)
+
+            # Descer para 7 metros antes de executar o passo 1
+            
+            print(f"Ajustando altitude para {self.target_pre_step_altitude} metros antes de procurar o ArUco...")
+            self.drone.descend(self.target_pre_step_altitude)
+
+            if not self.drone.wait_until_altitude_reached(self.target_pre_step_altitude):
+                print(f"Falha ao atingir a altitude de {self.target_pre_step_altitude} metros. Abortando...")
+                return
 
             # Passo 1: Centralizar e descer para 6 metros
             self.perform_step_one()

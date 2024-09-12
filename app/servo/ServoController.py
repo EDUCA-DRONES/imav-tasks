@@ -153,20 +153,27 @@ class ServoController:
         """
         try:
             # Movendo para o sentido horário (enrolando)
-            #print("Iniciando enrolamento...")
-            #self.activate_servo(150, 'clockwise')  # Enrola até 150 graus
-            #time.sleep(5)
+            time_activated_servo = 0.3
+            print(f"O servo ficará ativo por {time_activated_servo} segundo(s)")
+
+            # print("Iniciando enrolamento...")
+            # self.activate_servo(150, 'clockwise')  # Enrola até 150 graus
+            # time.sleep(time_activated_servo)
 
             # Movendo para o sentido anti-horário (desenrolando)
             print("Iniciando desenrolamento...")
             self.activate_servo(30, 'counterclockwise')  # Desenrola até 30 graus
-            time.sleep(30)
+            time.sleep(time_activated_servo)
 
             # Parando o servo
-            self.stop_servo()
+            #self.stop_servo()
 
         except Exception as e:
             print(f"Erro ao liberar a armadilha: {e}")
+
+        finally:
+            self.stop_servo()
+            
   
 
 """if __name__ == "__main__":
