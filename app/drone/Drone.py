@@ -14,23 +14,24 @@ import re
 class DroneConfig:
     def __init__(self) -> None:
         self.GUIDED_MODE = 4
+        self.maximum_altitude = 25
         self.x_meters_cover = 12
         self.y_meters_cover = 6
         
 # senha:101263
 class Drone:
     def __init__(self) -> None:
-        # self.IP = '127.0.0.1'
-        # self.PORT = '14551'
-        # self.PROTOCOL = 'udpin'
+        self.IP = '127.0.0.1'
+        self.PORT = '14551'
+        self.PROTOCOL = 'udpin'
         
         # self.IP = '192.168.0.103'
         # self.PORT = '5760'
         # self.PROTOCOL = 'tcp'
         
-        self.URL = f'/dev/serial/by-id/usb-ArduPilot_Pixhawk1_3E004B001651343037373231-if00'
+        # self.URL = f'/dev/serial/by-id/usb-ArduPilot_Pixhawk1-1M_3E0039001651343037373231-if00'
 
-        #self.URL = f'{self.PROTOCOL}:{self.IP}:{self.PORT}'
+        self.URL = f'{self.PROTOCOL}:{self.IP}:{self.PORT}'
         self.baud = '57600'
         # self.URL = f'/dev/ttyUSB0'
         self.METER_CONVERTER = 1000.0
@@ -68,6 +69,7 @@ class Drone:
         print("Drone armado.")
     
     def ascend(self, target_altitude):
+
         current_alt = self.current_altitude()
         movement = DroneMoveUPFactory.create(current_alt, self.conn)
     
@@ -87,6 +89,8 @@ class Drone:
                 print('Tentativa de comunicação excedeu o limite de tentivas... Tentando novamente.')
                 self.ascend(target_altitude)
                 break
+
+        self.check_maximum_altitude()
     
     def descend(self, target_altitude):
         msg = self.conn.recv_match(type='GLOBAL_POSITION_INT', blocking=True)
@@ -206,6 +210,7 @@ class Drone:
             lat = msg.lat / 1e7
             lon = msg.lon / 1e7
             alt = msg.alt / 1e3
+            
             return lat, lon, alt
         else:
             raise Exception("Failed to retrieve GPS position")
@@ -553,7 +558,7 @@ class Drone:
             print(f"Ajustando altitude para {desired_altitude} metros.")
             self.set_altitude(desired_altitude)
 
-    def check_safe_altitude(self, min_altitude: float = 1.0, safe_altitude: float = 1.5):
+    def check_safe_altitude(self, min_altitude: float = 1.0, max_altitude: float = 25, safe_altitude: float = 1.5):
         """
         Verifica se o drone está abaixo da altitude mínima permitida e o corrige se necessário.
         
@@ -596,5 +601,17 @@ class Drone:
             time.sleep(5)
             if self.current_altitude() >= min_altitude:
                 print("Altitude segura alcançada")
+
         else:
             print("Altitude dentro dos limites permitidos.")
+
+    def check_maximum_altitude(self):
+        altitude = self.current_altitude()
+        if altitude > self.config.maximum_altitude:
+            print("ATENTTION! MAXIMUM PERMITTED ALTITUDE EXCEEDED")
+            
+            self.descend(self.config.maximum_altitude - 1)
+            self.return_to_home()
+            return exit()
+
+

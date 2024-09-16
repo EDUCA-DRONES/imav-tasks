@@ -15,7 +15,7 @@ class TaskFour(Task.Task):
         self.camera = Camera()  # Assumindo que você tenha uma classe Camera
         self.aruco_detector = ArucoDetector()
         self.aruco_centralizer = ArucoCentralizer(self.drone, self.camera)
-        self.aruco_id = 105
+        self.aruco_id = 800
         self.servo = ServoController(self.drone)
 
         #self.delivery_system = ArUcoDeliverySystem(self.drone, self.camera)
@@ -26,7 +26,7 @@ class TaskFour(Task.Task):
         
         self.target_lat = -14.3014358
         self.target_long = -42.6902904
-        self.target_altitude = 12
+        self.target_altitude = 30
 
         self.target_pre_step_altitude = 7.0
 
