@@ -20,17 +20,17 @@ class DroneConfig:
 # senha:101263
 class Drone:
     def __init__(self) -> None:
-        self.IP = '127.0.0.1'
-        self.PORT = '14551'
-        self.PROTOCOL = 'udpin'
+        # self.IP = '127.0.0.1'
+        # self.PORT = '14551'
+        # self.PROTOCOL = 'udpin'
         
         # self.IP = '192.168.0.103'
         # self.PORT = '5760'
         # self.PROTOCOL = 'tcp'
         
-        # self.URL = f'/dev/serial/by-id/usb-ArduPilot_Pixhawk1-1M_3E0039001651343037373231-if00'
+        self.URL = f'/dev/serial/by-id/usb-ArduPilot_Pixhawk1_3E004B001651343037373231-if00'
 
-        self.URL = f'{self.PROTOCOL}:{self.IP}:{self.PORT}'
+        #self.URL = f'{self.PROTOCOL}:{self.IP}:{self.PORT}'
         self.baud = '57600'
         # self.URL = f'/dev/ttyUSB0'
         self.METER_CONVERTER = 1000.0
