@@ -5,8 +5,6 @@ from timeit import default_timer as timer
 from app.drone.tools.GPS import GPS
 from app.drone.enums.Masks import IGNORE_VELOCITY, POSITION, ONLY_POSITION
 from app.drone.DroneController import DroneController
-
-
 import math
 import subprocess
 import re
@@ -245,8 +243,10 @@ class Drone:
     def move_west(self, distance, velocity=0.5):
         self.move('west', distance, velocity)
 
-    def go_to_coord(self, new_lat, new_long, alt_return=15):
-      
+    def go_to_coord(self, new_lat, new_long, alt_return=None):
+        
+        alt_return = alt_return if alt_return else self.current_altitude()
+        
         # Enviar comando para ir para a nova coordenada
         msg = mavutil.mavlink.MAVLink_set_position_target_global_int_message(
             0,  # time_boot_ms (not used)
