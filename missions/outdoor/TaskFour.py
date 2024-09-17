@@ -26,7 +26,7 @@ class TaskFour(Task.Task):
         
         self.target_lat = -14.3014358
         self.target_long = -42.6902904
-        self.target_altitude = 30
+        self.target_altitude = 15
 
         self.target_pre_step_altitude = 7.0
 

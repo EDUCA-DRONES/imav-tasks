@@ -33,7 +33,7 @@ class TaskThree(Task.Task):
 
         self.starting_lat = None
         self.starting_long = None
-        
+        self.image_capture_altitude = 9
 
     def run(self):
         ALT_DRONE = 12
@@ -58,26 +58,37 @@ class TaskThree(Task.Task):
                 print(f"Indo para a coordenada {count}")
                 # Enviar o drone para as coordenadas específicas
                 success = self.drone.move_to_position(lat, long)
+                current_altitude = self.drone.current_altitude()
+               
                 if not success:
                     print(f"Falha ao chegar à coordenada ({lat}, {long}). Abortando missão.")
                     return
                 
+                if current_altitude > self.image_capture_altitude:
+                    print(f"Descendo para {self.image_capture_altitude} metros para capturar imagems")
+                    self.drone.descend(self.image_capture_altitude)
+                    self.drone.wait_until_altitude_reached(self.image_capture_altitude)
+                #elif current_altitude >= self.image_capture_altitude():
+                 #   print("Descendo para capturar imagems")
+                  #  self.drone.ascend(target)
+                    
                 print("Aguarde 5 segundos")
                 time.sleep(5)
 
                 self.capture_image(count)
                 print("Foto capturada")
+
+                if current_altitude < ALT_DRONE:
+                    print(f"Subindo de volta para {ALT_DRONE} metros")
+                    self.drone.ascend(ALT_DRONE)
+                    self.drone.wait_until_altitude_reached(ALT_DRONE)
+
+
                 count += 1 
 
             # Retornar ao ponto de partida e pousar
-            self.drone.return_to_home()
+            # self.drone.return_to_home()
             
-            """ success = self.drone.move_to_position(self.starting_lat, self.starting_long)
-            if success:
-                self.drone.land()
-                self.drone.disarm()
-            else:
-                print("Falha ao retornar ao ponto de partida. Missão abortada.")"""
             
         except KeyboardInterrupt as e:
             print(e)
@@ -104,8 +115,9 @@ class TaskThree(Task.Task):
         
             self.camera.save_image(f'imgs/zebras_data/img/{IMAGE_NAME}')
             self.camera.clean_buffer()
-            self.file_manager.create_meta_data(lat, long, alt, self.drone.current_altitude(), f"{zebra_id}_{i}")            
-            self.logger.log_position(zebra_id, i, lat, long, self.drone.current_altitude(), IMAGE_NAME)
+            current_altitude = self.drone.current_altitude()
+            self.file_manager.create_meta_data(lat, long, alt, current_altitude, f"{zebra_id}_{i}")            
+            self.logger.log_position(zebra_id, i, lat, long, current_altitude, IMAGE_NAME)
 
             time.sleep(0.5)
 

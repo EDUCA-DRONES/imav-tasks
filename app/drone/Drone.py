@@ -6,7 +6,6 @@ from app.drone.tools.GPS import GPS
 from app.drone.enums.Masks import IGNORE_VELOCITY, POSITION, ONLY_POSITION
 from app.drone.DroneController import DroneController
 
-
 import math
 import subprocess
 import re
