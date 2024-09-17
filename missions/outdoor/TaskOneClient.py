@@ -22,11 +22,18 @@ class TaskOneClient(Task.Task):
             return
         
         while True:
-            lat, long, _ = self.drone.get_gps_position()
-            alt = self.drone.current_altitude()
-            voltage, current = self.drone.get_battery_voltage_and_current()
-            self.logger.log_performance(lat, long, alt, voltage, current)
-            time.sleep(5)
+            try:
+
+                lat, long, _ = self.drone.get_gps_position()
+                alt = self.drone.current_altitude()
+                voltage, current = self.drone.get_battery_voltage_and_current()
+                self.logger.log_performance(lat, long, alt, voltage, current)
+                time.sleep(5)
+
+            except Exception as e:
+                print(e)
+                pass
+            
 
             
  

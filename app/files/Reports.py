@@ -6,7 +6,6 @@ from datetime import datetime
 
 import pytz
 
-os.environ.pop("QT_QPA_PLATFORM_PLUGIN_PATH")
 
 class MetaSingleton:
     _instances = {}

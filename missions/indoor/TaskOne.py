@@ -36,6 +36,7 @@ class TaskOne(Task.Task):
         self.aruco_centralizer = ArucoCentralizer(self.drone, self.camera)
 
         self.follow_tape = FollowTape(self.drone, self.camera)
+        
 
     def run(self):
         try:

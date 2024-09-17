@@ -10,7 +10,7 @@ aruco_detector = ArucoDetector()
 def main():
     camera = Camera()
         
-    camera.initialize_video_capture('computer')
+    camera.initialize_video_capture('rtsp')
     
     try:
         while True:
