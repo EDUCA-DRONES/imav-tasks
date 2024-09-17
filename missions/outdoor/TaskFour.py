@@ -24,8 +24,8 @@ class TaskFour(Task.Task):
         #self.target_lat = -14.3024719 # Latitude para colocar a armadilha
         #self.target_long = -42.6896867 # Longitude para colocar a armadilha
         
-        self.target_lat = -14.3014358
-        self.target_long = -42.6902904
+        self.target_lat = 51.4045039
+        self.target_long = -2.8189669
         self.target_altitude = 30
 
         self.target_pre_step_altitude = 7.0

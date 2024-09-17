@@ -6,7 +6,7 @@ from datetime import datetime
 
 import pytz
 
-os.environ.pop("QT_QPA_PLATFORM_PLUGIN_PATH")
+# os.environ.pop("QT_QPA_PLATFORM_PLUGIN_PATH")
 
 class MetaSingleton:
     _instances = {}
@@ -39,7 +39,6 @@ class DetectionsByAltReport(MetaSingleton):
         '15': initial_state.copy()
     }
     
-  
     def save_data(self, _type, alt, detections):
         self.data[str(alt)][_type] += detections
     

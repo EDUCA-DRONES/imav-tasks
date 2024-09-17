@@ -23,14 +23,14 @@ class TaskTwo(Task.Task):
         self.camera = Camera()
         self.zebra_detector = ZebraModel.ZebraModel()
         
-        self.camera_type = 'computer'
+        self.camera_type = 'rtsp'
         
         # Definindo as coordenadas do terreno
         self.boundaries = {
             # "upper_left": (-14.3024023, -42.6903888), 
             # "lower_right": (-14.3036796, -42.6890734) 
-            "upper_left": (-14.3014387, -42.6905811), 
-            "lower_right": (-14.3026152, -42.6891587) 
+            "upper_left": (51.4039735, -2.8207925), 
+            "lower_right": (51.4021629, -2.8217366) 
         }
         
         self.camera_delay = 0.25
@@ -42,20 +42,21 @@ class TaskTwo(Task.Task):
                 print("Falha ao conectar com o drone.")
                 return
 
-            self.drone.change_to_guided_mode()
+            # self.drone.change_to_guided_mode()
 
-            starting_lat, starting_long, _ = self.drone.get_gps_position()
+            # starting_lat, starting_long, _ = self.drone.get_gps_position()
            
             point_lat, point_lon = self.boundaries['upper_left']
-            print(f"Posição inicial: {starting_lat}, {starting_long}")
+            # print(f"Posição inicial: {starting_lat}, {starting_long}")
 
-            self.camera.initialize_video_capture(self.camera_type)
+            # self.camera.initialize_video_capture(self.camera_type)
 
-            self.drone.set_home(starting_lat, starting_long)
-            self.drone.arm_drone()
-            self.drone.ascend(12)
+            # self.drone.set_home(starting_lat, starting_long)
+            # self.drone.arm_drone()
+            # self.drone.ascend(12)
+            self.drone.descend(12)
             self.drone.move_to_position(point_lat, point_lon)
-
+            
             is_front = True
             count = 1
             
