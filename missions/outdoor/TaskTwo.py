@@ -5,9 +5,6 @@ from app.camera.Camera import Camera
 from app.files.FileManager import FileManager
 from app.ml import ZebraModel
 from missions.outdoor import Task
-import cv2
-import os
-from stitching import Stitcher
 
 class TaskTwo(Task.Task):
     """
@@ -104,7 +101,6 @@ class TaskTwo(Task.Task):
 
         finally:
             self.drone.return_to_home()
-            self.stitch_images('imgs/map/img')
 
     def move_drone(self, x, y):
         x = x / 2 if x != 0 else 0
@@ -137,7 +133,7 @@ class TaskTwo(Task.Task):
         self.camera.save_image(img_name)
         print(img_name)
         lat, long, alt = self.drone.get_gps_position()
-        self.file_manager.create_meta_data(lat, long, alt, self.drone.current_altitude(), count, timestamp, quantity)
+        self.file_manager.create_meta_data(lat, long, alt, self.drone.current_altitude(), count, timestamp, quantity, img_name)
 
     def is_within_latitude_boundaries(self):
         """
@@ -158,34 +154,4 @@ class TaskTwo(Task.Task):
         _, lon_lower = self.boundaries["lower_right"]
 
         return lon_upper <= current_long <= lon_lower
-
-    def stitch_images(self, image_folder):
-        """
-        Mescla as imagens capturadas em um mosaico usando a biblioteca stitching.
-        """
-        images = []
-        filenames = os.listdir(image_folder)
-        filenames.sort()
-        for filename in filenames:
-            print(filename)
-            img_path = os.path.join(image_folder, filename)
-            img = cv2.imread(img_path)
-            if img is not None:
-                images.append(img)
-
-        if len(images) < 2:
-            print("Não há imagens suficientes para fazer o mosaico.")
-            return
-
-        # Utilizando a biblioteca stitching para mesclar as imagens
-        print("Iniciando o processo de criação de mosaico usando stitching.")
-        stitcher = Stitcher(detector="sift", confidence_threshold=0.2)  # Você pode ajustar os parâmetros aqui
-        stitched_image = stitcher.stitch(images)
-
-        if stitched_image is not None:
-            output_path = os.path.join(image_folder, "mosaico_final.jpg")
-            cv2.imwrite(output_path, stitched_image)
-            print(f"Mosaico criado com sucesso! Salvo em: {output_path}")
-        else:
-            print("Erro ao criar o mosaico.")
-
+ 
