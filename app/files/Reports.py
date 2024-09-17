@@ -4,6 +4,8 @@ import csv
 import os
 from datetime import datetime
 
+import pytz
+
 os.environ.pop("QT_QPA_PLATFORM_PLUGIN_PATH")
 
 class MetaSingleton:
@@ -78,7 +80,7 @@ class FlightLogger:
         # Cria o arquivo CSV e escreve o cabeçalho
         with open(self.log_file, mode='w', newline='') as file:
             writer = csv.writer(file)
-            writer.writerow(['Zebra ID', 'Image ID Number', 'Time UTC', 'Latitude', 'Longitude', 'Altitude', 'Image Name'])
+            writer.writerow(['Time UTC', 'Latitude', 'Longitude', 'Altitude', 'Current', 'Voltage'])
 
     def log_position(self, zebra_id, image_id, lat, long, alt, image_name):
         # Registra a posição atual do drone no arquivo CSV
@@ -86,6 +88,14 @@ class FlightLogger:
             writer = csv.writer(file)
             timestamp = datetime.utcnow().isoformat()  # Hora UTC no formato AAAA-MM-DDTHH:MM:SS.sss
             writer.writerow([zebra_id, image_id, timestamp, lat, long, alt, image_name])
+
+    def log_performance(self, lat, long, alt, voltage, current):
+        with open(self.log_file, mode='a', newline='') as file:
+            writer = csv.writer(file)
+            tz = pytz.timezone('Europe/London')
+            time_now = datetime.now(tz)
+            timestamp = time_now.isoformat()  # Time in ISO format
+            writer.writerow([ timestamp, lat, long, alt, voltage, current])
 
 # Example usage:
 # singleton = ReportCapturedImagesSingleton()

@@ -19,13 +19,13 @@ class DroneConfig:
 # senha:101263
 class Drone:
     def __init__(self) -> None:
-        self.IP = '127.0.0.1'
-        self.PORT = '14551'
-        self.PROTOCOL = 'udpin'
+        # self.IP = '127.0.0.1'
+        # self.PORT = '14551'
+        # self.PROTOCOL = 'udpin'
         
-        # self.IP = '192.168.0.103'
-        # self.PORT = '5760'
-        # self.PROTOCOL = 'tcp'
+        self.IP = '192.168.0.103'
+        self.PORT = '5760'
+        self.PROTOCOL = 'tcp'
         
         # self.URL = f'/dev/serial/by-id/usb-ArduPilot_Pixhawk1-1M_3E0039001651343037373231-if00'
 
@@ -614,4 +614,24 @@ class Drone:
             self.return_to_home()
             return exit()
 
+    def get_battery_voltage_and_current(self):
+        self.conn.mav.request_data_stream_send(
+            self.conn.target_system,
+            self.conn.target_component,
+            mavutil.mavlink.MAV_DATA_STREAM_ALL,
+            1,  # Interval in Hz
+            1   # Start streaming
+        )
+
+        try:
+            while True:
+                msg = self.conn.recv_match(type='BATTERY_STATUS', blocking=True)
+                if msg:
+                    voltage = msg.voltages[0] # Convert from millivolts to volts
+                    current = msg.current_battery # Convert from centiAmps to Amps
+                    print(f"Battery Voltage: {voltage} V")
+                    print(f"Battery Current: {current} A")
+                    return voltage, current
+        except KeyboardInterrupt:
+            return None
 
