@@ -647,17 +647,44 @@ class Drone:
         except KeyboardInterrupt:
             return None
   
-    def move_forward(self, speed_mps = 0.3):
-        self.conn.mav.send(
-            mavutil.mavlink.MAVLink_set_position_target_local_ned_message(
-                10,
-                self.conn.target_system,
-                self.conn.target_component,
-                mavutil.mavlink.MAV_FRAME_LOCAL_NED,
-                int(0b110111111000),
-                10,
-                0,
-                -10,
-                0, 0, 0, 0, 0, 0, 0, 0
-            )
+    def move_forward(self, speed_mps = 0.5, distance = 0.3):
+        self.conn.mav.set_position_target_local_ned_send(
+           0,  # Tempo_boot_ms (não utilizado)
+            self.conn.target_system,  # Sistema alvo
+            self.conn.target_component,  # Componente alvo
+            mavutil.mavlink.MAV_FRAME_BODY_NED,  # Quadro de referência
+            0b0000111111111111,  # Máscara de tipo: ignorar todos, exceto velocidade
+            speed_mps,  # Velocidade X em m/s
+            0,  # Velocidade Y em m/s
+            0,  # Velocidade Z em m/s
+            0,  # Posição X (não utilizada)
+            0,  # Posição Y (não utilizada)
+            0,  # Posição Z (não utilizada)
+            0,  # Aceleração X (não utilizada)
+            0,  # Aceleração Y (não utilizada)
+            0,  # Aceleração Z (não utilizada)
+            0,  # Yaw (não utilizada)
+            0   # Taxa de yaw (não utilizada)
+        )
+
+        time.sleep(1)
+        
+        # Parar o movimento
+        self.conn.mav.set_position_target_local_ned_send(
+            0,
+            self.conn.target_system,
+            self.conn.target_component,
+            mavutil.mavlink.MAV_FRAME_BODY_NED,
+            0b0000111111111111,
+            0,  # Velocidade X em m/s (parar)
+            0,  # Velocidade Y em m/s (parar)
+            0,  # Velocidade Z em m/s (parar)
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0,
+            0
         )
