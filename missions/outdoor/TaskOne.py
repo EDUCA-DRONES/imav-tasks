@@ -8,7 +8,7 @@ class TaskOne(Task.Task):
     def __init__(self) -> None:
         print('Mission 1')
         self.drone = Drone()
-        self.camera_type = 'computer'
+        self.camera_type = 'rtsp'
 
         self.coordinates = [
             (51.4033710, -2.8194634), 

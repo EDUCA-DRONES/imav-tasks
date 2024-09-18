@@ -81,34 +81,18 @@ class Camera:
        
     def capture_images_and_metadata(self, drone: Drone,  fileManager: FileManager, aruco_detector: ArucoDetector, alt, type, num_images=10, pause_time=0.5):
        
-        report = DetectionsByAltReport()
-
-        i = 0
-        while True:
-            i = i + 1
-            if i % 5 == 0:
-                answer = input('Continua? y/n')
-                if answer == 'n' :
-                    break;
-                    
-            time.sleep(pause_time)  # Espera entre capturas
-
+        for i in range(num_images):
             ret, frame = self.cap.read()
             processed_image, ids, __ = aruco_detector.detect_arucos(frame)
             lat, long, alt_ = drone.get_gps_position()
             
             if ret:
-                detections = 0
-                if ids is not None and ids.size > 0:
-                    print(ids, ids.__class__)
-                    detections, __ = ids.shape
-                report.save_data(type, alt, detections  )
                 fileManager.create_image(frame, alt, i)  
                 fileManager.create_meta_data(lat, long, alt, drone.current_altitude(), i)
-            
-            self.clean_buffer()
+        
+        self.clean_buffer()
 
-        self.release_video_capture() # Libera a câmera após a captura
+        self.release_video_capture() 
                     
     def clean_buffer(self):
         for _ in range(60):  

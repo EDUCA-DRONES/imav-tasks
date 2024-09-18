@@ -31,9 +31,6 @@ class FollowTape:
             # self.camera.save_image(f'imgs/indoor/task1/img-largest_contour_{timestamp}.jpg')
             #cv2.imwrite(f'imgs/indoor/task1/img-largest_contour_{timestamp}.jpg', largest_contour)
             #cv2.imwrite(f'imgs/indoor/task1/img-mask-{timestamp}.jpg', mask)
-
-
-
             
             if largest_contour is not None:
                 cX, cY = self._calculate_contour_center(largest_contour)

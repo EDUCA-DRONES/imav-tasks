@@ -14,7 +14,7 @@ class TaskOneClient(Task.Task):
         self.logger = FlightLogger('perfomance.csv')
         self.logger.initialize_log_file()
         self.logger
-        self.camera_type = 'computer'
+        self.camera_type = 'rtsp'
 
     def run(self):
         if not self.drone.connected():

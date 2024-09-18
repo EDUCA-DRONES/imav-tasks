@@ -47,23 +47,6 @@ class FileManager:
         except IOError as e:
             print(f"Erro ao criar o arquivo de metadados: {e}")
         
-        # Criar ou atualizar gcp_list.txt
-        gcp_filename = os.path.join(self.meta_path, 'gcp_list.txt')
-        gcp_line = f"+proj=utm +zone=10 +ellps=WGS84 +datum=WGS84 +units=m +no_defs\n"
-        try:
-            if os.path.exists(gcp_filename):
-                with open(gcp_filename, 'a') as gcpfile:
-                    gcpfile.write(f"{lat} {long} {real_alt} 0 0 {img_name}\n")
-            else:
-                with open(gcp_filename, 'w') as gcpfile:
-                    gcpfile.write(gcp_line)
-                    gcpfile.write(f"{lat} {long} {real_alt} 0 0 {img_name}\n")
-        except IOError as e:
-            print(f"Erro ao criar ou atualizar o arquivo GCP: {e}")
-        
-      
-        self.add_exif_data(img_name, lat, long, real_alt, self.timestamp)
-        
     def add_exif_data(self, image_path: str, lat: float, long: float, alt: float, timestamp: str) -> None:
         """Adiciona metadados EXIF à imagem JPEG usando a biblioteca piexif."""
         try:

@@ -19,7 +19,7 @@ class TaskFour(Task.Task):
         self.servo = ServoController(self.drone)
 
         #self.delivery_system = ArUcoDeliverySystem(self.drone, self.camera)
-        self.camera_type = 'computer'
+        self.camera_type = 'rtsp'
         
         #self.target_lat = -14.3024719 # Latitude para colocar a armadilha
         #self.target_long = -42.6896867 # Longitude para colocar a armadilha

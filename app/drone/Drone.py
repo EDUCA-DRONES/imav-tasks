@@ -19,13 +19,13 @@ class DroneConfig:
 # senha:101263
 class Drone:
     def __init__(self) -> None:
-        self.IP = '127.0.0.1'
-        self.PORT = '14551'
-        self.PROTOCOL = 'udpin'
+        # self.IP = '127.0.0.1'
+        # self.PORT = '14551'
+        # self.PROTOCOL = 'udpin'
         
-        # self.IP = '192.168.0.104'
-        # self.PORT = '5760'
-        # self.PROTOCOL = 'tcp'
+        self.IP = '192.168.0.104'
+        self.PORT = '5760'
+        self.PROTOCOL = 'tcp'
         
         # self.URL = f'/dev/serial/by-id/usb-ArduPilot_Pixhawk1-1M_3E0039001651343037373231-if00'
 
@@ -39,7 +39,6 @@ class Drone:
         self.gps = GPS()
         #self.servo = ServoController()
 
-
         self.home_lat = None
         self.home_long = None
 
@@ -51,11 +50,22 @@ class Drone:
     def solicit_telemetry(self):
         self.conn.mav.request_data_stream_send(self.conn.target_system, self.conn.target_component, mavutil.mavlink.MAV_DATA_STREAM_ALL, 4, 1)
         
+    # def current_altitude(self):
+    #     msg = self.conn.recv_match(type='GLOBAL_POSITION_INT', blocking=True, timeout=2)
+    #     if msg:
+    #         return msg.relative_alt / self.METER_CONVERTER   # Convertendo de mm para metros
+    #     return None
+    
     def current_altitude(self):
-        msg = self.conn.recv_match(type='GLOBAL_POSITION_INT', blocking=True, timeout=2)
+        self.conn.mav.request_data_stream_send(
+            self.conn.target_system, 
+            self.conn.target_component, 
+            mavutil.mavlink.MAV_DATA_STREAM_ALL, 
+            4, 1)
+
+        msg = self.conn.recv_match(type='DISTANCE_SENSOR', blocking=True)
         if msg:
-            return msg.relative_alt / self.METER_CONVERTER   # Convertendo de mm para metros
-        return None
+            return msg.current_distance / 100
     
     def arm_drone(self):
         print("Armando drone...")
@@ -307,6 +317,7 @@ class Drone:
                 time.sleep(movement_check_interval)
                 current_lat, current_long, _ = self.get_gps_position()
                 
+                
                 # Verifica se o drone está se movendo na direção correta
                 if self.is_moving_towards_target(initial_lat, initial_long, current_lat, current_long, target_lat, target_long):
                     # Verifica se o drone atingiu a coordenada
@@ -354,7 +365,6 @@ class Drone:
         # Verifica se as coordenadas de HOME estão definidas
         if self.home_lat is None or self.home_long is None:
             raise ValueError("Coordenadas de retorno para HOME não foram definidas.")
-    
 
         print(f"O drone está retornando para HOME: Lat {self.home_lat}, Lon {self.home_long}")
         self.move_to_position(self.home_lat, self.home_long)
@@ -499,10 +509,18 @@ class Drone:
                
     def rotate_yaw(self, yaw_angle_deg):
         # Gira o drone no eixo yaw em graus
-        yaw_rate = yaw_angle_deg * (3.14159 / 180)  # Converte graus para radianos
-        duration = 2  # Tempo em segundos (ajuste conforme necessário)
-        self.send_movement_command(vx=0, vy=0, vz=1.5, yaw_rate=yaw_rate, duration=duration)
-
+        self.conn.mav.command_long_send(
+            self.conn.target_system, 
+            self.conn.target_component,
+            mavutil.mavlink.MAV_CMD_CONDITION_YAW, 
+            0, 
+            yaw_angle_deg,
+            10,
+            1,
+            0,
+            0,0,0
+            
+        )
 
     def adjust_roll(self, angle_degrees, duration=5):
         """
@@ -542,12 +560,6 @@ class Drone:
                 0  # Yaw rate
             )
             time.sleep(1)
-
-    def move_forward(self, distance_meters, speed_mps):
-        # Move o drone para frente uma distância específica
-        duration = int(distance_meters / speed_mps)
-        self.send_movement_command(vx=speed_mps, vy=0, vz=0, yaw_rate=0, duration=duration)
-
 
     def check_and_adjust_altitude(self, desired_altitude):
         """
@@ -634,4 +646,7 @@ class Drone:
                     return voltage, current
         except KeyboardInterrupt:
             return None
-
+  
+    def move_forward(self, distance_meters, speed_mps = 1):
+        duration = int(distance_meters / speed_mps)
+        self.send_movement_command(vx=speed_mps, vy=0, vz=0, yaw_rate=0, duration=duration)
