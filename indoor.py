@@ -16,12 +16,18 @@ class Indoor:
         self.IPCAM = 'rtsp'
         self.RASPBERRY = 'imx'
         self.TASK_ONE_ARUCO = 105
+        self.TASK_TWO_BEGIN_ARUCO = 200
+        self.TASK_TWO_END_ARUCO = 200
+        self.TASK_THREE_ARUCO = 302
+        self.TASK_FOUR_ARUCO = 302
+        self.speedMps = 0.5
+        self.cmMovimenters = self.cmMovimenters
       
     def taskOne(self):
         self.drone.ascend(1.5)  
         print('subiu')
         
-        for i in range(13):
+        for i in range(16):
             self.camera.initialize_video_capture(self.IPCAM)
             self.camera.read_capture()
             images, ids, corner = self.arucoDetector.detect_arucos(self.camera.frame)
@@ -39,7 +45,7 @@ class Indoor:
                 break
             else:
                 print('mexendo')
-                self.drone.move_forward(0.3, 0.5) 
+                self.drone.move_forward(self.speedMps) 
         
         for i in range(5):
             self.fileManager.create_image(
@@ -49,8 +55,44 @@ class Indoor:
             )
             
     def taskTwo(self):
-        pass
-              
+        self.drone.descend(1.2)
+        self.drone.rotate_yaw(90)
+        
+        for i in range(13):
+            self.camera.initialize_video_capture(self.IPCAM)
+            self.camera.read_capture()
+            images, ids, corner = self.arucoDetector.detect_arucos(self.camera.frame)
+            if ids is not None and self.TASK_TWO_END_ARUCO in ids:
+                self.drone.move_forward(0.8) 
+                break
+            else:
+                print('mexendo')
+                self.drone.move_forward(self.speedMps) 
+    
+    def taskThree(self):
+        self.drone.ascend(1.7)
+        for i in range(12):
+            self.camera.initialize_video_capture(self.IPCAM)
+            self.camera.read_capture()
+            images, ids, corner = self.arucoDetector.detect_arucos(self.camera.frame)
+            if ids is not None and self.TASK_THREE_ARUCO in ids:
+                break
+            else:
+                print('mexendo')
+                self.drone.move_forward(self.speedMps) 
+          
+    def taskFour(self):
+        self.drone.rotate_yaw(90)
+        for i in range(6):
+            self.camera.initialize_video_capture(self.IPCAM)
+            self.camera.read_capture()
+            images, ids, corner = self.arucoDetector.detect_arucos(self.camera.frame)
+            if ids is not None and self.TASK_THREE_ARUCO in ids:
+                break
+            else:
+                print('mexendo')
+                self.drone.move_forward(self.speedMps) 
+          
     def run(self) -> None:
         try:
             if not self.drone.connected():
@@ -61,8 +103,9 @@ class Indoor:
         
             self.drone.arm_drone()
             self.taskOne()
-            self.drone.rotate_yaw(90)
-            
+            self.taskTwo()
+            self.taskThree()
+                        
         except KeyboardInterrupt as e:
             print(e)
             print(e.with_traceback())

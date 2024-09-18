@@ -647,6 +647,22 @@ class Drone:
         except KeyboardInterrupt:
             return None
   
-    def move_forward(self, distance_meters, speed_mps = 1):
-        duration = int(distance_meters / speed_mps)
-        self.send_movement_command(vx=speed_mps, vy=0, vz=0, yaw_rate=0, duration=duration)
+    def move_forward(self, speed_mps = 0.3):
+        self.conn.mav.set_position_target_local_ned_send(
+            0,  # Time_boot_ms (not used)
+            self.conn.target_system,  # Target system
+            self.conn.target_component,  # Target component
+            mavutil.mavlink.MAV_FRAME_BODY_NED,  # Coordinate frame
+            0b0000111111111111,  # Type_mask: ignore all but velocity
+            speed_mps,  # X velocity in m/s
+            0,  # Y velocity in m/s
+            0,  # Z velocity in m/s
+            0,  # X position (not used)
+            0,  # Y position (not used)
+            0,  # Z position (not used)
+            0,  # X acceleration (not used)
+            0,  # Y acceleration (not used)
+            0,  # Z acceleration (not used)
+            0,  # Yaw (not used)
+            0   # Yaw rate (not used)
+        )
