@@ -162,7 +162,7 @@ class ServoController:
 
             # Movendo para o sentido anti-horário (desenrolando)
             print("Iniciando desenrolamento...")
-            self.activate_servo(30, 'counterclockwise')  # Desenrola até 30 graus
+            self.activate_servo(30, 'counterclockwise')  # até 30 graus
             time.sleep(time_activated_servo)
 
             # Parando o servo
