@@ -113,6 +113,8 @@ class Indoor:
         except Exception as e:
             print(e)
             print(e.with_traceback())
-        
+        finally:
+            self.drone.land()
+            self.drone.disarm()
 indoor = Indoor()
 indoor.run()

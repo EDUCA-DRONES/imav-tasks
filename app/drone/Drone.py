@@ -648,21 +648,16 @@ class Drone:
             return None
   
     def move_forward(self, speed_mps = 0.3):
-        self.conn.mav.set_position_target_local_ned_send(
-            0,  # Time_boot_ms (not used)
-            self.conn.target_system,  # Target system
-            self.conn.target_component,  # Target component
-            mavutil.mavlink.MAV_FRAME_BODY_NED,  # Coordinate frame
-            0b0000111111111111,  # Type_mask: ignore all but velocity
-            speed_mps,  # X velocity in m/s
-            0,  # Y velocity in m/s
-            0,  # Z velocity in m/s
-            0,  # X position (not used)
-            0,  # Y position (not used)
-            0,  # Z position (not used)
-            0,  # X acceleration (not used)
-            0,  # Y acceleration (not used)
-            0,  # Z acceleration (not used)
-            0,  # Yaw (not used)
-            0   # Yaw rate (not used)
+        self.conn.mav.send(
+            mavutil.mavlink.MAVLink_set_position_target_local_ned_message(
+                10,
+                self.conn.target_system,
+                self.conn.target_component,
+                mavutil.mavlink.MAV_FRAME_LOCAL_NED,
+                int(0b110111111000),
+                10,
+                0,
+                -10,
+                0, 0, 0, 0, 0, 0, 0, 0
+            )
         )
