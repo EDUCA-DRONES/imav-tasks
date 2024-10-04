@@ -6,6 +6,7 @@ drone = Drone()
 if not drone.connected():
     exit()
 
+drone.change_to_guided_mode()
 drone.arm_drone()
 drone.ascend(3)
 
