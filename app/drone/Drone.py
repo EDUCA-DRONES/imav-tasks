@@ -19,9 +19,9 @@ class DroneConfig:
 # senha:101263
 class Drone:
     def __init__(self) -> None:
-        self.IP = '127.0.0.1'
-        self.PORT = '14551'
-        self.PROTOCOL = 'udpin'
+        # self.IP = '127.0.0.1'
+        # self.PORT = '14551'
+        # self.PROTOCOL = 'udpin'
         
         self.IP = '192.168.0.104'
         self.PORT = '5760'
@@ -50,22 +50,11 @@ class Drone:
     def solicit_telemetry(self):
         self.conn.mav.request_data_stream_send(self.conn.target_system, self.conn.target_component, mavutil.mavlink.MAV_DATA_STREAM_ALL, 4, 1)
         
-    # def current_altitude(self):
-    #     msg = self.conn.recv_match(type='GLOBAL_POSITION_INT', blocking=True, timeout=2)
-    #     if msg:
-    #         return msg.relative_alt / self.METER_CONVERTER   # Convertendo de mm para metros
-    #     return None
-    
     def current_altitude(self):
-        self.conn.mav.request_data_stream_send(
-            self.conn.target_system, 
-            self.conn.target_component, 
-            mavutil.mavlink.MAV_DATA_STREAM_ALL, 
-            4, 1)
-
-        msg = self.conn.recv_match(type='DISTANCE_SENSOR', blocking=True)
+        msg = self.conn.recv_match(type='GLOBAL_POSITION_INT', blocking=True, timeout=2)
         if msg:
-            return msg.current_distance / 100
+            return msg.relative_alt / self.METER_CONVERTER   # Convertendo de mm para metros
+        return None
     
     def arm_drone(self):
         print("Armando drone...")
@@ -509,18 +498,10 @@ class Drone:
                
     def rotate_yaw(self, yaw_angle_deg):
         # Gira o drone no eixo yaw em graus
-        self.conn.mav.command_long_send(
-            self.conn.target_system, 
-            self.conn.target_component,
-            mavutil.mavlink.MAV_CMD_CONDITION_YAW, 
-            0, 
-            yaw_angle_deg,
-            10,
-            1,
-            0,
-            0,0,0
-            
-        )
+        yaw_rate = yaw_angle_deg * (3.14159 / 180)  # Converte graus para radianos
+        duration = 2  # Tempo em segundos (ajuste conforme necessário)
+        self.send_movement_command(vx=0, vy=0, vz=1.5, yaw_rate=yaw_rate, duration=duration)
+
 
     def adjust_roll(self, angle_degrees, duration=5):
         """
@@ -560,6 +541,12 @@ class Drone:
                 0  # Yaw rate
             )
             time.sleep(1)
+
+    def move_forward(self, distance_meters, speed_mps = 1):
+        # Move o drone para frente uma distância específica
+        duration = int(distance_meters / speed_mps)
+        self.send_movement_command(vx=speed_mps, vy=0, vz=0, yaw_rate=0, duration=duration)
+
 
     def check_and_adjust_altitude(self, desired_altitude):
         """
@@ -646,45 +633,41 @@ class Drone:
                     return voltage, current
         except KeyboardInterrupt:
             return None
-  
-    def move_forward(self, speed_mps = 0.5, distance = 0.3):
-        self.conn.mav.set_position_target_local_ned_send(
-           0,  # Tempo_boot_ms (não utilizado)
-            self.conn.target_system,  # Sistema alvo
-            self.conn.target_component,  # Componente alvo
-            mavutil.mavlink.MAV_FRAME_BODY_NED,  # Quadro de referência
-            0b0000111111111111,  # Máscara de tipo: ignorar todos, exceto velocidade
-            speed_mps,  # Velocidade X em m/s
-            0,  # Velocidade Y em m/s
-            0,  # Velocidade Z em m/s
-            0,  # Posição X (não utilizada)
-            0,  # Posição Y (não utilizada)
-            0,  # Posição Z (não utilizada)
-            0,  # Aceleração X (não utilizada)
-            0,  # Aceleração Y (não utilizada)
-            0,  # Aceleração Z (não utilizada)
-            0,  # Yaw (não utilizada)
-            0   # Taxa de yaw (não utilizada)
-        )
 
-        time.sleep(1)
-        
-        # Parar o movimento
-        self.conn.mav.set_position_target_local_ned_send(
-            0,
+    def send_command(self, cmd, param1=0, param2=0, param3=0, param4=0, param5=0, param6=0, param7=0):
+        """Envia um comando MAVLink para o drone."""
+        self.conn.mav.command_long_send(
             self.conn.target_system,
             self.conn.target_component,
-            mavutil.mavlink.MAV_FRAME_BODY_NED,
-            0b0000111111111111,
-            0,  # Velocidade X em m/s (parar)
-            0,  # Velocidade Y em m/s (parar)
-            0,  # Velocidade Z em m/s (parar)
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0,
-            0
+            cmd,
+            0,  # Confirmation
+            param1,
+            param2,
+            param3,
+            param4,
+            param5,
+            param6,
+            param7
         )
+
+    def move_forward(self, speed=0.3):
+        """Move o drone para frente."""
+        # Enviar um comando para mover para frente (em geral, isso depende do tipo de controle)
+        # Aqui estamos usando um exemplo básico, o comando e os parâmetros podem variar
+        self.send_command(mavutil.mavlink.MAV_CMD_DO_CHANGE_SPEED, speed, 0, 0, 0, 0, 0)
+
+    def move_backward(self, speed=0.3):
+        """Move o drone para trás."""
+        # Mover para trás é muitas vezes o mesmo que mover para frente com uma velocidade negativa
+        self.move_forward(-speed)
+
+    def move_left(self, speed=0.3):
+        """Move o drone para a esquerda."""
+        # Enviar um comando para mover para a esquerda (em geral, isso depende do tipo de controle)
+        # Aqui estamos assumindo que o comando é o mesmo, apenas o sentido da velocidade muda
+        self.send_command(mavutil.mavlink.MAV_CMD_DO_CHANGE_SPEED, speed, 0, 0, 0, 0, 0) 
+
+    def move_right(self, speed=0.3):
+        """Move o drone para a direita."""
+        # Mover para a direita é muitas vezes o mesmo que mover para a esquerda com uma velocidade oposta
+        self.move_left(-speed)

@@ -153,7 +153,7 @@ class ServoController:
         """
         try:
             # Movendo para o sentido horário (enrolando)
-            time_activated_servo = 0.3
+            time_activated_servo = 22
             print(f"O servo ficará ativo por {time_activated_servo} segundo(s)")
 
             # print("Iniciando enrolamento...")

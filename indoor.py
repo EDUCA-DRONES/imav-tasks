@@ -17,17 +17,18 @@ class Indoor:
         self.RASPBERRY = 'imx'
         self.TASK_ONE_ARUCO = 105
         self.TASK_TWO_BEGIN_ARUCO = 200
-        self.TASK_TWO_END_ARUCO = 200
+        self.TASK_TWO_END_ARUCO = 205
         self.TASK_THREE_ARUCO = 302
-        self.TASK_FOUR_ARUCO = 302
-        self.speedMps = 0.5
-        self.cmMovimenters = self.cmMovimenters
+        self.TASK_FOUR_ARUCO = 400
+        self.speedMps = 3
+        self.cmMovimenters = 3          qq1 
       
     def taskOne(self):
         self.drone.ascend(1.5)  
         print('subiu')
         
         for i in range(16):
+             
             self.camera.initialize_video_capture(self.IPCAM)
             self.camera.read_capture()
             images, ids, corner = self.arucoDetector.detect_arucos(self.camera.frame)
@@ -87,8 +88,9 @@ class Indoor:
             self.camera.initialize_video_capture(self.IPCAM)
             self.camera.read_capture()
             images, ids, corner = self.arucoDetector.detect_arucos(self.camera.frame)
-            if ids is not None and self.TASK_THREE_ARUCO in ids:
-                break
+            if ids is not None and self.TASK_FOUR_ARUCO in ids:
+               pass
+              
             else:
                 print('mexendo')
                 self.drone.move_forward(self.speedMps) 
@@ -105,14 +107,14 @@ class Indoor:
             self.taskOne()
             self.taskTwo()
             self.taskThree()
+            self.taskFour()
+        
                         
         except KeyboardInterrupt as e:
             print(e)
-            print(e.with_traceback())
 
         except Exception as e:
             print(e)
-            print(e.with_traceback())
         finally:
             self.drone.land()
             self.drone.disarm()
